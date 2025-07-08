@@ -1,11 +1,7 @@
-const sheetUrl = https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8El5F-Dzp9csw4uTuisucRK5eyq0q8Hkyq6q18-yX90e4M-8I9VBa2OsVhogDgudfTQScjuQhpubz/pub?output=csv
+const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8El5F-Dzp9csw4uTuisucRK5eyq0q8Hkyq6q18-yX90e4M-8I9VBa2OsVhogDgudfTQScjuQhpubz/pub?output=csv";
 
 let flashcards = [];
 let currentIndex = 0;
-let showingDefinition = false;
-
-const card = document.getElementById("card");
-const nextBtn = document.getElementById("next-btn");
 
 // Shuffle function
 function shuffleArray(array) {
@@ -16,42 +12,49 @@ function shuffleArray(array) {
 }
 
 function loadCSV(url) {
+  console.log("Loading CSV from:", url);
   fetch(url)
     .then((res) => res.text())
     .then((data) => {
       const rows = data.trim().split("\n").slice(1); // Skip header
       flashcards = rows.map((row) => {
         const [word, definition] = row.split(",");
-        return { word: word.trim(), definition: definition.trim() };
+        return {
+          word: word.trim(),
+          definition: definition.trim()
+        };
       });
 
       shuffleArray(flashcards);
       showCard();
     })
     .catch((err) => {
-      card.textContent = "Error loading flashcards.";
+      document.getElementById("card-front").textContent = "Error loading flashcards.";
       console.error("Fetch error:", err);
     });
 }
 
 function showCard() {
   if (flashcards.length === 0) {
-    card.textContent = "No cards loaded.";
+    document.getElementById("card-front").textContent = "No cards loaded.";
+    document.getElementById("card-back").textContent = "";
     return;
   }
 
   const { word, definition } = flashcards[currentIndex];
-  card.textContent = showingDefinition ? definition : word;
+  document.getElementById("card-front").textContent = word;
+  document.getElementById("card-back").textContent = definition;
+
+  // Make sure it always starts on the front side
+  document.getElementById("card").classList.remove("flipped");
 }
 
-card.addEventListener("click", () => {
-  showingDefinition = !showingDefinition;
-  showCard();
+document.getElementById("card").addEventListener("click", () => {
+  document.getElementById("card").classList.toggle("flipped");
 });
 
-nextBtn.addEventListener("click", () => {
+document.getElementById("next-btn").addEventListener("click", () => {
   currentIndex = (currentIndex + 1) % flashcards.length;
-  showingDefinition = false;
   showCard();
 });
 
