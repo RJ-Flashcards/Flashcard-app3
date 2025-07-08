@@ -1,18 +1,19 @@
 const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8El5F-Dzp9csw4uTuisucRK5eyq0q8Hkyq6q18-yX90e4M-8I9VBa2OsVhogDgudfTQScjuQhpubz/pub?output=csv";
 
 let flashcards = [];
+let currentIndex = 0;
+let showingDefinition = false;
+
+const card = document.getElementById("card");
+const nextBtn = document.getElementById("next-btn");
+
+// ✅ SHUFFLE FUNCTION
 function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [array[i], array[j]] = [array[j], array[i]];
   }
 }
-
-let currentIndex = 0;
-let showingDefinition = false;
-
-const card = document.getElementById("card");
-const nextBtn = document.getElementById("next-btn");
 
 function loadCSV(url) {
   fetch(url)
@@ -23,13 +24,8 @@ function loadCSV(url) {
         const [word, definition] = row.split(",");
         return { word: word.trim(), definition: definition.trim() };
       });
-      function shuffleArray(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-}
 
+      shuffleArray(flashcards); // ✅ SHUFFLE ADDED HERE
       showCard();
     })
     .catch((err) => {
@@ -57,6 +53,10 @@ nextBtn.addEventListener("click", () => {
   currentIndex = (currentIndex + 1) % flashcards.length;
   showingDefinition = false;
   showCard();
+});
+
+loadCSV(sheetUrl);
+
 });
 
 loadCSV(sheetUrl);
