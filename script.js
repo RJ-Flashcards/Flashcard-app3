@@ -7,7 +7,7 @@ let showingDefinition = false;
 const card = document.getElementById("card");
 const nextBtn = document.getElementById("next-btn");
 
-// ✅ SHUFFLE FUNCTION
+// Shuffle function
 function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -25,7 +25,7 @@ function loadCSV(url) {
         return { word: word.trim(), definition: definition.trim() };
       });
 
-      shuffleArray(flashcards); // ✅ SHUFFLE ADDED HERE
+      shuffleArray(flashcards);
       showCard();
     })
     .catch((err) => {
@@ -53,10 +53,6 @@ nextBtn.addEventListener("click", () => {
   currentIndex = (currentIndex + 1) % flashcards.length;
   showingDefinition = false;
   showCard();
-});
-
-loadCSV(sheetUrl);
-
 });
 
 loadCSV(sheetUrl);
