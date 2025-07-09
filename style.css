@@ -80,11 +80,14 @@ button:hover {
 /* Set a fixed size for the card */
 .card {
   width: 90%;
-  max-width: 400px;
-  height: 250px;
+  max-width: 500px;
+  height: 160px; /* ⬅️ reduce the height for a more horizontal feel */
   margin: 2rem auto;
   perspective: 1000px;
+  border-radius: 15px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
+
 
 /* Make sure card-inner fills the card */
 .card-inner {
