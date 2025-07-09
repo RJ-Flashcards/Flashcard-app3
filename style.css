@@ -1,4 +1,4 @@
-/* === Base Layout === */
+/* === Reset & Base === */
 body, html {
   margin: 0;
   padding: 0;
@@ -8,6 +8,7 @@ body, html {
   background-color: #f2f2f2;
 }
 
+/* === Container === */
 .container {
   display: flex;
   flex-direction: column;
@@ -16,11 +17,11 @@ body, html {
   text-align: center;
   padding: 2rem;
   margin: 0 auto;
-  box-sizing: border-box;
   max-width: 600px;
+  box-sizing: border-box;
 }
 
-/* === Card Style === */
+/* === Card === */
 .card {
   width: 90%;
   max-width: 500px;
@@ -87,13 +88,22 @@ body, html {
   background-color: #155a9c;
 }
 
-/* === Mobile Tweaks === */
+/* === Mobile Adjustments === */
 @media (max-width: 600px) {
   .card {
     width: 95vw;
     aspect-ratio: 3 / 2;
-    height: auto;
   }
 
   .card-front,
-  .card-ba
+  .card-back {
+    font-size: 1.5rem !important;
+    padding: 1rem;
+  }
+
+  #next-btn {
+    margin-top: 1rem;
+    font-size: 1rem;
+    padding: 0.5rem 1.2rem;
+  }
+}
