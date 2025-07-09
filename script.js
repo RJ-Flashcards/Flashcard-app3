@@ -1,7 +1,8 @@
 // ✅ This is the original CSV link in case I need to re-publish or copy it again:
 // https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8El5F-Dzp9csw4uTuisucRK5eyq0q8Hkyq6q18-yX90e4M-8I9VBa2OsVhogDgudfTQScjuQhpubz/pub?output=csv
 
-const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8El5F-Dzp9csw4uTuisucRK5eyq0q8Hkyq6q18-yX90e4M-8I9VBa2OsVhogDgudfTQScjuQhpubz/pub?gid=0&single=true&output=csv";
+const sheetURL = 'https://raw.githubusercontent.com/RJ-Flashcards/Flashcard-app3/main/vocab.csv';
+
 
 
 
