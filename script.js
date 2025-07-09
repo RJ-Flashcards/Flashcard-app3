@@ -4,60 +4,66 @@ let flashcards = [];
 let currentCard = 0;
 let isFlipped = false;
 
-
-// Shuffle function
-function shuffleArray(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-}
-
-function loadCSV(url) {
-  console.log("Loading CSV from:", url);
-  fetch(url)
-    .then((res) => res.text())
-    .then((data) => {
-      const rows = data.trim().split("\n").slice(1); // Skip header
-      flashcards = rows.map((row) => {
-        const [word, definition] = row.split(",");
-        return {
-          word: word.trim(),
-          definition: definition.trim()
-        };
-      });
-
-      shuffleArray(flashcards);
-      showCard();
+function fetchFlashcards() {
+  fetch(sheetURL)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to fetch CSV');
+      }
+      return response.text();
     })
-    .catch((err) => {
-      document.getElementById("card-front").textContent = "Error loading flashcards.";
-      console.error("Fetch error:", err);
+    .then(data => {
+      const lines = data.trim().split('\n');
+      const headers = lines[0].split(',');
+      flashcards = lines.slice(1).map(line => {
+        const [term, definition] = line.split(',');
+        return { term: term.trim(), definition: definition.trim() };
+      });
+      shuffleFlashcards();
+      displayCard();
+    })
+    .catch(error => {
+      document.getElementById('card-front').innerText = 'Error loading flashcards.';
+      console.error('Error:', error);
     });
 }
 
-function showCard() {
+function shuffleFlashcards() {
+  for (let i = flashcards.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [flashcards[i], flashcards[j]] = [flashcards[j], flashcards[i]];
+  }
+}
+
+function displayCard() {
+  const front = document.getElementById('card-front');
+  const back = document.getElementById('card-back');
+  const cardElement = document.getElementById('flashcard');
+
   if (flashcards.length === 0) {
-    document.getElementById("card-front").textContent = "No cards loaded.";
-    document.getElementById("card-back").textContent = "";
+    front.innerText = 'No flashcards available.';
+    back.innerText = '';
     return;
   }
 
-  const { word, definition } = flashcards[currentIndex];
-  document.getElementById("card-front").textContent = word;
-  document.getElementById("card-back").textContent = definition;
+  const card = flashcards[currentCard];
+  front.innerText = card.term;
+  back.innerText = card.definition;
 
-  // Make sure it always starts on the front side
-  document.getElementById("card").classList.remove("flipped");
+  cardElement.classList.remove('flipped');
+  isFlipped = false;
 }
 
-document.getElementById("card").addEventListener("click", () => {
-  document.getElementById("card").classList.toggle("flipped");
+document.getElementById('flashcard').addEventListener('click', () => {
+  const cardElement = document.getElementById('flashcard');
+  cardElement.classList.toggle('flipped');
+  isFlipped = !isFlipped;
 });
 
-document.getElementById("next-btn").addEventListener("click", () => {
-  currentIndex = (currentIndex + 1) % flashcards.length;
-  showCard();
+document.getElementById('next-btn').addEventListener('click', () => {
+  if (flashcards.length === 0) return;
+  currentCard = (currentCard + 1) % flashcards.length;
+  displayCard();
 });
 
-loadCSV(sheetUrl);
+fetchFlashcards();
