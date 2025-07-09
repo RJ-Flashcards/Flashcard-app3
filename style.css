@@ -81,12 +81,14 @@ button:hover {
 .card {
   width: 90%;
   max-width: 500px;
-  height: 160px; /* ⬅️ reduce the height for a more horizontal feel */
+  aspect-ratio: 3 / 2;  /* 📐 Force a landscape ratio (e.g., 3 wide : 2 tall) */
   margin: 2rem auto;
   perspective: 1000px;
   border-radius: 15px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  position: relative; /* Required for inner positioning */
 }
+
 
 
 /* Make sure card-inner fills the card */
@@ -175,4 +177,9 @@ button:hover {
 /* Trigger the flip effect */
 .card.flipped .card-inner {
   transform: rotateY(180deg);
+}
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
