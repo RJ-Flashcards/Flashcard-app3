@@ -93,7 +93,7 @@ body {
 
   .card-front,
   .card-back {
-    font-size: 1.3rem;
+  font-size: 1.3rem !important;
     padding: 1rem;
   }
 
