@@ -183,3 +183,23 @@ button:hover {
   flex-direction: column;
   align-items: center;
 }
+/* === Mobile Layout Fix === */
+@media (max-width: 600px) {
+  .card {
+    width: 95vw;            /* Fill most of the screen */
+    aspect-ratio: 3 / 2;    /* Keep landscape shape */
+    height: auto;           /* Let aspect-ratio control height */
+  }
+
+  .card-front,
+  .card-back {
+    font-size: 1rem;        /* Slightly smaller text */
+    padding: 1rem;          /* Tighter padding */
+  }
+
+  #next-btn {
+    margin-top: 1rem;
+    font-size: 1rem;
+    padding: 0.5rem 1.2rem;
+  }
+}
