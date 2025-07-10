@@ -14,7 +14,6 @@ function fetchFlashcards() {
     })
     .then(data => {
       const lines = data.trim().split('\n');
-      const headers = lines[0].split(',');
       flashcards = lines.slice(1).map(line => {
         const [term, definition] = line.split(',');
         return { term: term.trim(), definition: definition.trim() };
@@ -38,16 +37,7 @@ function shuffleFlashcards() {
 function displayCard() {
   const front = document.getElementById('card-front');
   const back = document.getElementById('card-back');
- const flashcard = document.getElementById('flashcard');
-
-flashcard.addEventListener('click', (e) => {
-  // Only flip if the exact element clicked was the flashcard (not a child like a button)
-  if (e.target !== flashcard) return;
-
-  flashcard.classList.toggle('flipped');
-  isFlipped = !isFlipped;
-});
-
+  const flashcard = document.getElementById('flashcard');
 
   if (flashcards.length === 0) {
     front.innerText = 'No flashcards available.';
@@ -59,21 +49,42 @@ flashcard.addEventListener('click', (e) => {
   front.innerText = card.term;
   back.innerText = card.definition;
 
-  cardElement.classList.remove('flipped');
+  flashcard.classList.remove('flipped');
   isFlipped = false;
 }
 
+// ✅ Flip on tap (but not on button click)
 document.getElementById('flashcard').addEventListener('click', (e) => {
-  if (e.target.tagName.toLowerCase() === 'button') return; // Don't flip if button was clicked
-  const cardElement = document.getElementById('flashcard');
-  cardElement.classList.toggle('flipped');
+  if (e.target.tagName.toLowerCase() === 'button') return;
+  document.getElementById('flashcard').classList.toggle('flipped');
   isFlipped = !isFlipped;
 });
 
-
+// ✅ Next button logic
 document.getElementById('next-btn').addEventListener('click', () => {
-  if (flashcards.length === 0) return;
+  if (!isFlipped) {
+    // Flip first if not yet flipped
+    document.getElementById('flashcard').classList.add('flipped');
+    isFlipped = true;
+    return;
+  }
+
+  // If already flipped, move to next card
   currentCard = (currentCard + 1) % flashcards.length;
+  displayCard();
+});
+
+// ✅ Back button logic
+document.getElementById('back-btn')?.addEventListener('click', () => {
+  if (!isFlipped) {
+    // Flip first if not yet flipped
+    document.getElementById('flashcard').classList.add('flipped');
+    isFlipped = true;
+    return;
+  }
+
+  // If already flipped, go to previous card
+  currentCard = (currentCard - 1 + flashcards.length) % flashcards.length;
   displayCard();
 });
 
