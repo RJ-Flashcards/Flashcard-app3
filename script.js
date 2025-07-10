@@ -38,7 +38,16 @@ function shuffleFlashcards() {
 function displayCard() {
   const front = document.getElementById('card-front');
   const back = document.getElementById('card-back');
-  const cardElement = document.getElementById('flashcard');
+ const flashcard = document.getElementById('flashcard');
+
+flashcard.addEventListener('click', (e) => {
+  // Only flip if the exact element clicked was the flashcard (not a child like a button)
+  if (e.target !== flashcard) return;
+
+  flashcard.classList.toggle('flipped');
+  isFlipped = !isFlipped;
+});
+
 
   if (flashcards.length === 0) {
     front.innerText = 'No flashcards available.';
