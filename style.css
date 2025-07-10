@@ -1,3 +1,4 @@
+/* === Global Styles === */
 body, html {
   margin: 0;
   padding: 0;
@@ -7,6 +8,7 @@ body, html {
   background-color: #f2f2f2;
 }
 
+/* === Container === */
 .container {
   display: flex;
   flex-direction: column;
@@ -19,17 +21,18 @@ body, html {
   box-sizing: border-box;
 }
 
+/* === Flashcard === */
 .card {
   width: 90%;
   max-width: 500px;
   aspect-ratio: 3 / 2;
   margin: 2rem auto;
   perspective: 1000px;
+  border: 4px solid #2E8B57; /* Forest green border */
   border-radius: 15px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
   position: relative;
   box-sizing: border-box;
-  border: 4px solid #2E8B57; /* forest green border */
 }
 
 .card-inner {
@@ -68,20 +71,70 @@ body, html {
   transform: rotateY(180deg);
 }
 
-/* Buttons container */
+/* === Buttons Wrapper === */
 .buttons {
+  margin-top: 1.5rem;
   display: flex;
   justify-content: center;
   gap: 1rem;
-  margin-top: 1.5rem;
+  z-index: 2;
+  position: relative;
 }
 
-/* Buttons style for both Back and Next */
-.buttons button {
+/* === Button Styling (shared) === */
+.buttons button,
+#next-btn,
+#back-btn {
   padding: 0.75rem 1.5rem;
   font-size: 1.1rem;
+  border: none;
   background-color: #1976d2;
   color: white;
-  border: no
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s, transform 0.2s;
+  min-width: 100px;
+}
+
+#next-btn:hover,
+#back-btn:hover {
+  background-color: #155a9c;
+  transform: translateY(-2px);
+}
+
+/* === Responsive Styling === */
+@media (max-width: 480px) {
+  .buttons {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .buttons button {
+    width: 100%;
+    font-size: 1.2rem;
+  }
+
+  #next-btn,
+  #back-btn {
+    width: 100%;
+  }
+}
+
+/* === Prevent Card Flip from Buttons === */
+#flashcard {
+  pointer-events: auto;
+  position: relative;
+  z-index: 1;
+}
+
+.buttons {
+  pointer-events: auto;
+}
+
+.buttons button {
+  pointer-events: auto;
+}
+
 
 
