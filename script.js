@@ -53,39 +53,40 @@ function displayCard() {
   isFlipped = false;
 }
 
-// ✅ Flip on tap (but not on button click)
+// ✅ Flip card on tap only (not on button click)
 document.getElementById('flashcard').addEventListener('click', (e) => {
-  if (e.target.tagName.toLowerCase() === 'button') return;
+  if (e.target.closest('button')) return; // prevent flip on button click
   document.getElementById('flashcard').classList.toggle('flipped');
   isFlipped = !isFlipped;
 });
 
-// ✅ Next button logic
-document.getElementById('next-btn').addEventListener('click', () => {
+// ✅ Next button — flip first, then go to next
+document.getElementById('next-btn')?.addEventListener('click', (e) => {
+  e.stopPropagation();
+
   if (!isFlipped) {
-    // Flip first if not yet flipped
     document.getElementById('flashcard').classList.add('flipped');
     isFlipped = true;
     return;
   }
 
-  // If already flipped, move to next card
   currentCard = (currentCard + 1) % flashcards.length;
   displayCard();
 });
 
-// ✅ Back button logic
-document.getElementById('back-btn')?.addEventListener('click', () => {
+// ✅ Back button — flip first, then go to previous
+document.getElementById('back-btn')?.addEventListener('click', (e) => {
+  e.stopPropagation();
+
   if (!isFlipped) {
-    // Flip first if not yet flipped
     document.getElementById('flashcard').classList.add('flipped');
     isFlipped = true;
     return;
   }
 
-  // If already flipped, go to previous card
   currentCard = (currentCard - 1 + flashcards.length) % flashcards.length;
   displayCard();
 });
 
 fetchFlashcards();
+
