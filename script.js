@@ -53,21 +53,19 @@ function displayCard() {
   isFlipped = false;
 }
 
-// ✅ Flip card on tap only (not on button click)
+// ✅ Flip card on tap only
 document.getElementById('flashcard').addEventListener('click', (e) => {
-  if (e.target.tagName.toLowerCase() === 'button') {
-    e.stopPropagation();  // Stop click from flipping the card
-    return;
+  const tag = e.target.tagName.toLowerCase();
+  if (tag === 'button' || tag === 'svg' || tag === 'path') {
+    return; // don't flip if a button or icon was tapped
   }
+
   document.getElementById('flashcard').classList.toggle('flipped');
   isFlipped = !isFlipped;
 });
 
-
 // ✅ Next button — flip first, then go to next
-document.getElementById('next-btn')?.addEventListener('click', (e) => {
-  e.stopPropagation();
-
+document.getElementById('next-btn')?.addEventListener('click', () => {
   if (!isFlipped) {
     document.getElementById('flashcard').classList.add('flipped');
     isFlipped = true;
@@ -79,9 +77,7 @@ document.getElementById('next-btn')?.addEventListener('click', (e) => {
 });
 
 // ✅ Back button — flip first, then go to previous
-document.getElementById('back-btn')?.addEventListener('click', (e) => {
-  e.stopPropagation();
-
+document.getElementById('back-btn')?.addEventListener('click', () => {
   if (!isFlipped) {
     document.getElementById('flashcard').classList.add('flipped');
     isFlipped = true;
@@ -93,4 +89,5 @@ document.getElementById('back-btn')?.addEventListener('click', (e) => {
 });
 
 fetchFlashcards();
+
 
