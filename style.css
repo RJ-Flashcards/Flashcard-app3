@@ -100,25 +100,26 @@ body, html {
 /* Responsive layout for mobile */
 @media (max-width: 480px) {
   .buttons {
-    flex-direction: row; /* Keep buttons side-by-side */
-    gap: 0.75rem;
+    flex-direction: row; /* side-by-side */
+    justify-content: center;
+    gap: 1rem;
   }
 
   .buttons button {
     font-size: 1.1rem;
     padding: 0.75rem 1.5rem;
-    background-color: #1976d2;
-    color: white;
+    min-width: 100px;
+    background-color: #1976d2 !important;
+    color: white !important;
     border: none;
     border-radius: 8px;
     cursor: pointer;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     transition: background-color 0.3s, transform 0.2s;
-    min-width: 100px;
   }
 
   .buttons button:hover {
-    background-color: #155a9c;
+    background-color: #155a9c !important;
     transform: translateY(-2px);
   }
 }
