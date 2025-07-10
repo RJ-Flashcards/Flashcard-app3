@@ -64,25 +64,18 @@ document.getElementById('flashcard').addEventListener('click', (e) => {
   isFlipped = !isFlipped;
 });
 
-// ✅ Next button — flip first, then go to next
+// ✅ Next button — go to next card and reset to front
 document.getElementById('next-btn')?.addEventListener('click', () => {
-  if (!isFlipped) {
-    document.getElementById('flashcard').classList.add('flipped');
-    isFlipped = true;
-    return;
-  }
-
   currentCard = (currentCard + 1) % flashcards.length;
-  displayCard();
+  displayCard();  // this will reset to front and remove flipped state
 });
 
-// ✅ Back button — flip first, then go to previous
+// ✅ Back button — go to previous card and reset to front
 document.getElementById('back-btn')?.addEventListener('click', () => {
-  if (!isFlipped) {
-    document.getElementById('flashcard').classList.add('flipped');
-    isFlipped = true;
-    return;
-  }
+  currentCard = (currentCard - 1 + flashcards.length) % flashcards.length;
+  displayCard();  // also resets flip
+});
+
 
   currentCard = (currentCard - 1 + flashcards.length) % flashcards.length;
   displayCard();
