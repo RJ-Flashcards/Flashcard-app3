@@ -89,6 +89,24 @@ body, html {
 #next-btn:hover {
   background-color: #155a9c;
 }
+
+#back-btn {
+  padding: 0.75rem 1.5rem;
+  font-size: 1.1rem;
+  margin-top: 2rem;
+  border: none;
+  background-color: #1976d2;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s;
+}
+
+#back-btn:hover {
+  background-color: #155a9c;
+}
+
 /* Prevent buttons from triggering card flip */
 .buttons {
   pointer-events: auto;
