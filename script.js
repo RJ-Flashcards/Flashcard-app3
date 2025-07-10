@@ -54,11 +54,13 @@ function displayCard() {
   isFlipped = false;
 }
 
-document.getElementById('flashcard').addEventListener('click', () => {
+document.getElementById('flashcard').addEventListener('click', (e) => {
+  if (e.target.tagName.toLowerCase() === 'button') return; // Don't flip if button was clicked
   const cardElement = document.getElementById('flashcard');
   cardElement.classList.toggle('flipped');
   isFlipped = !isFlipped;
 });
+
 
 document.getElementById('next-btn').addEventListener('click', () => {
   if (flashcards.length === 0) return;
