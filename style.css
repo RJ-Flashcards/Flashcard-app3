@@ -89,3 +89,21 @@ body, html {
 #next-btn:hover {
   background-color: #155a9c;
 }
+/* Prevent buttons from triggering card flip */
+.buttons {
+  pointer-events: auto;
+  z-index: 2;
+  position: relative;
+}
+
+.buttons button {
+  pointer-events: auto;
+}
+
+/* Flashcard only listens for clicks directly on it */
+#flashcard {
+  pointer-events: auto;
+  position: relative;
+  z-index: 1;
+}
+
