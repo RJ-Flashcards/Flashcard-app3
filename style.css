@@ -107,8 +107,15 @@ body, html {
   .buttons button {
     width: 100%;
     font-size: 1.2rem;
+    background-color: #1976d2;
+    color: white;
+  }
+
+  .buttons button:hover {
+    background-color: #155a9c;
   }
 }
+
 
 /* Ensure flashcard clicks are handled correctly */
 #flashcard {
