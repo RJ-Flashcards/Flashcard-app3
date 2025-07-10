@@ -55,10 +55,14 @@ function displayCard() {
 
 // ✅ Flip card on tap only (not on button click)
 document.getElementById('flashcard').addEventListener('click', (e) => {
-  if (e.target.closest('button')) return; // prevent flip on button click
+  if (e.target.tagName.toLowerCase() === 'button') {
+    e.stopPropagation();  // Stop click from flipping the card
+    return;
+  }
   document.getElementById('flashcard').classList.toggle('flipped');
   isFlipped = !isFlipped;
 });
+
 
 // ✅ Next button — flip first, then go to next
 document.getElementById('next-btn')?.addEventListener('click', (e) => {
