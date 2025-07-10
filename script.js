@@ -37,43 +37,47 @@ function shuffleFlashcards() {
 function displayCard() {
   const front = document.getElementById('card-front');
   const back = document.getElementById('card-back');
-  const flashcard = document.getElementById('flashcard');
-
-  if (flashcards.length === 0) {
-    front.innerText = 'No flashcards available.';
-    back.innerText = '';
-    return;
-  }
-
   const card = flashcards[currentCard];
+
   front.innerText = card.term;
   back.innerText = card.definition;
 
-  flashcard.classList.remove('flipped');
-  isFlipped = false;
+  // Keep the card in its current flipped state
+  const flashcard = document.getElementById('flashcard');
+  if (isFlipped) {
+    flashcard.classList.add('flipped');
+  } else {
+    flashcard.classList.remove('flipped');
+  }
 }
 
-// ✅ Tap card to flip
+// ✅ Flip only on card tap (never on button press)
 document.getElementById('flashcard').addEventListener('click', (e) => {
-  if (e.target.tagName.toLowerCase() === 'button') return;
+  if (e.target.tagName.toLowerCase() === 'button') {
+    e.stopPropagation();
+    return;
+  }
   const flashcard = document.getElementById('flashcard');
   flashcard.classList.toggle('flipped');
   isFlipped = !isFlipped;
 });
 
-// ✅ Next — go to next card, reset flip
-document.getElementById('next-btn').addEventListener('click', () => {
+// ✅ Move to next card, preserve flip state
+document.getElementById('next-btn')?.addEventListener('click', (e) => {
+  e.stopPropagation();
   currentCard = (currentCard + 1) % flashcards.length;
-  displayCard();  // always show front
+  displayCard();
 });
 
-// ✅ Back — go to previous card, reset flip
-document.getElementById('back-btn').addEventListener('click', () => {
+// ✅ Move to previous card, preserve flip state
+document.getElementById('back-btn')?.addEventListener('click', (e) => {
+  e.stopPropagation();
   currentCard = (currentCard - 1 + flashcards.length) % flashcards.length;
-  displayCard();  // always show front
+  displayCard();
 });
 
 fetchFlashcards();
+
 
 
 
