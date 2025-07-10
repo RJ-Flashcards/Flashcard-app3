@@ -100,6 +100,13 @@ body, html {
   pointer-events: auto;
 }
 
+.buttons {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
 /* Flashcard only listens for clicks directly on it */
 #flashcard {
   pointer-events: auto;
