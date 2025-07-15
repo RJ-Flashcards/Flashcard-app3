@@ -71,7 +71,7 @@ body, html {
   transform: rotateY(180deg);
 }
 
-/* ===== Buttons ===== */
+/* ===== Buttons Styling ===== */
 .buttons {
   display: flex;
   justify-content: center;
@@ -90,9 +90,9 @@ body, html {
   border: none;
   border-radius: 8px;
   cursor: pointer;
+  min-width: 140px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  transition: background-color 0.3s, transform 0.2s;
-  min-width: 120px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .buttons button:hover {
@@ -100,29 +100,19 @@ body, html {
   transform: translateY(-2px);
 }
 
-/* ===== Flashcard Tap Area ===== */
-#flashcard {
-  pointer-events: auto;
-  position: relative;
-  z-index: 1;
-}
-
-/* ===== Mobile Responsiveness ===== */
+/* ===== Mobile Styling (Same as Desktop) ===== */
 @media (max-width: 480px) {
   .buttons {
     flex-direction: row; /* Keep buttons side-by-side */
+    justify-content: center;
     gap: 1rem;
   }
 
   .buttons button {
     font-size: 1.2rem;
     padding: 1rem 2rem;
-    min-width: 120px;
+    min-width: 140px;
+    background-color: #1976d2;
+    color: white;
   }
 }
-
-
-
-
-
-
