@@ -116,3 +116,7 @@ body, html {
     color: white;
   }
 }
+
+body {
+  background-color: pink !important;
+}
