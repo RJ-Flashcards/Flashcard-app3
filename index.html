@@ -11,40 +11,88 @@
       padding: 20px;
       background-color: #f0f8ff;
     }
-    #card {
-      background: white;
-      border-radius: 12px;
-      padding: 30px;
-      margin: 20px auto;
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    select {
+      font-size: 16px;
+      padding: 8px 12px;
+      margin-bottom: 20px;
+      border-radius: 6px;
+    }
+
+    .card-container {
+      perspective: 1000px;
       width: 90%;
       max-width: 400px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      font-size: 24px;
-      cursor: pointer;
+      margin: 20px auto;
     }
+
+    #card {
+      width: 100%;
+      height: 200px;
+      background-color: white;
+      color: black;
+      border: 4px solid forestgreen;
+      border-radius: 20px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+      cursor: pointer;
+      position: relative;
+    }
+
+    #card.flipped {
+      transform: rotateY(180deg);
+    }
+
+    .card-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .front {
+      font-weight: bold;
+    }
+
+    .back {
+      transform: rotateY(180deg);
+    }
+
     .buttons {
       display: flex;
       justify-content: center;
-      gap: 10px;
+      gap: 12px;
+      margin-top: 20px;
     }
+
     button {
       background-color: #007bff;
       color: white;
       border: none;
-      padding: 10px 20px;
+      padding: 12px 24px;
       font-size: 18px;
       border-radius: 8px;
       cursor: pointer;
     }
+
     button:hover {
       background-color: #0056b3;
     }
-    select {
-      margin-bottom: 20px;
-      font-size: 16px;
-      padding: 8px;
-      border-radius: 8px;
-    }
+
   </style>
 </head>
 <body>
@@ -57,7 +105,12 @@
     <option value="day2">Day 2</option>
   </select>
 
-  <div id="card">Loading...</div>
+  <div class="card-container">
+    <div id="card">
+      <div class="card-face front" id="front">Loading...</div>
+      <div class="card-face back" id="back"></div>
+    </div>
+  </div>
 
   <div class="buttons">
     <button onclick="prevCard()">Back</button>
@@ -74,33 +127,59 @@
     let currentCard = 0;
     let showingDefinition = false;
 
-    const cardEl = document.getElementById("card");
+    const card = document.getElementById("card");
+    const front = document.getElementById("front");
+    const back = document.getElementById("back");
     const sheetSelect = document.getElementById("sheetSelect");
 
     sheetSelect.addEventListener("change", () => {
       loadSheet(sheetSelect.value);
     });
 
-    function loadSheet(dayKey) {
-      const url = sheetLinks[dayKey];
+    function loadSheet(key) {
+      const url = sheetLinks[key];
       fetch(url)
-        .then(response => response.text())
+        .then(res => res.text())
         .then(csv => {
           const rows = csv.trim().split("\n").slice(1);
           cards = rows.map(row => {
-            const [word, definition] = row.split(",");
-            return { word: word.trim(), definition: definition.trim() };
+            const [word, def] = row.split(",");
+            return { word: word.trim(), definition: def.trim() };
           });
           shuffle(cards);
           currentCard = 0;
           showingDefinition = false;
-          displayCard();
-        })
-        .catch(err => {
-          cardEl.innerText = "Failed to load data.";
-          console.error(err);
+          updateCard();
         });
     }
+
+    function updateCard() {
+      const item = cards[currentCard];
+      front.textContent = item.word;
+      back.textContent = item.definition;
+      card.classList.remove("flipped");
+      showingDefinition = false;
+    }
+
+    function nextCard() {
+      currentCard = (currentCard + 1) % cards.length;
+      updateCard();
+    }
+
+    function prevCard() {
+      currentCard = (currentCard - 1 + cards.length) % cards.length;
+      updateCard();
+    }
+
+    card.addEventListener("click", () => {
+      card.classList.toggle("flipped");
+      showingDefinition = !showingDefinition;
+    });
+
+    // Load Day 1 by default
+    window.onload = () => {
+      loadSheet("day1");
+    };
 
     function shuffle(array) {
       for (let i = array.length - 1; i > 0; i--) {
@@ -108,40 +187,11 @@
         [array[i], array[j]] = [array[j], array[i]];
       }
     }
-
-    function displayCard() {
-      if (cards.length === 0) {
-        cardEl.innerText = "No cards available.";
-        return;
-      }
-      const card = cards[currentCard];
-      cardEl.innerText = showingDefinition ? card.definition : card.word;
-    }
-
-    function nextCard() {
-      currentCard = (currentCard + 1) % cards.length;
-      showingDefinition = false;
-      displayCard();
-    }
-
-    function prevCard() {
-      currentCard = (currentCard - 1 + cards.length) % cards.length;
-      showingDefinition = false;
-      displayCard();
-    }
-
-    cardEl.addEventListener("click", () => {
-      showingDefinition = !showingDefinition;
-      displayCard();
-    });
-
-    // Load default sheet on page load
-    window.onload = () => {
-      loadSheet("day1");
-    };
   </script>
+
 </body>
 </html>
+
 
 
 
