@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Vocabulary Flashcards</title>
   <link rel="stylesheet" href="style-v2.css" />
 </head>
+
 <body>
   <div class="app">
     <h1>Vocabulary Flashcards</h1>
@@ -13,8 +15,8 @@
     <div class="controls">
       <label for="sheet-select">Choose a Day:</label>
       <select id="sheet-select">
-        <option value="761404854">Day 1</option>
-        <option value="0">Day 2</option>
+        <option value="0">Day 1</option>
+        <option value="761404854">Day 2</option>
       </select>
     </div>
 
@@ -43,11 +45,10 @@
     let currentCard = 0;
     let showingDefinition = false;
 
-    // Make sure this matches your published sheet's ID
     const SHEET_ID = "1AwPGr0h17V5CWTgO4GGk35hD8fr_GDy9uHOjTVIO3n4";
 
     function getSheetURL(sheetGid) {
-      return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${sheetGid}`;
+      return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${sheetGid}`;
     }
 
     function shuffle(array) {
@@ -78,7 +79,7 @@
         const text = await response.text();
         const lines = text.trim().split("\n");
         cards = lines.slice(1).map(line => {
-          const [word, definition] = line.split(/,(.+)/);
+          const [word, definition] = line.split(/,(.+)/); // Only split on the first comma
           return { word: word.trim(), definition: definition.trim() };
         });
         shuffle(cards);
@@ -117,11 +118,13 @@
       loadSheet(selectedGid);
     });
 
-    // Load Day 1 by default (which is gid=761404854)
-    loadSheet("761404854");
+    // Load default tab on startup (Day 1)
+    loadSheet("0");
   </script>
 </body>
+
 </html>
+
 
 
 
