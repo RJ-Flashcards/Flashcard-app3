@@ -18,7 +18,7 @@
 
     select, button {
       font-size: 18px;
-      padding: 10px 20px;
+      padding: 12px 24px;
       margin: 5px;
       border: none;
       border-radius: 8px;
@@ -33,14 +33,15 @@
 
     #flashcard {
       background: white;
-      border-radius: 16px;
-      padding: 40px;
+      border: 4px solid forestgreen;
+      border-radius: 20px;
+      padding: 50px;
       margin: 20px auto;
-      width: 90%;
-      max-width: 400px;
+      width: 95%;
+      max-width: 480px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      font-size: 24px;
-      min-height: 150px;
+      font-size: 28px;
+      min-height: 180px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -50,7 +51,6 @@
     }
 
     .flipped {
-      transform: rotateY(180deg);
       background-color: #e9f5ff;
     }
 
@@ -95,7 +95,8 @@
       try {
         const response = await fetch(url);
         const text = await response.text();
-        data = text.trim().split('\n').map(row => row.split(','));
+        const rows = text.trim().split('\n').slice(1); // Remove header
+        data = rows.map(row => row.split(','));
         currentIndex = 0;
         showingFront = true;
         displayCard();
@@ -109,8 +110,8 @@
         flashcard.textContent = "No cards found.";
         return;
       }
-      const [front, back] = data[currentIndex];
-      flashcard.textContent = showingFront ? front : back;
+      const [word, definition] = data[currentIndex];
+      flashcard.textContent = showingFront ? word : definition;
       flashcard.classList.toggle("flipped", !showingFront);
     }
 
@@ -122,7 +123,7 @@
     prevBtn.addEventListener("click", () => {
       if (currentIndex > 0) {
         currentIndex--;
-        showingFront = true;
+        showingFront = true; // Always show front when navigating
         displayCard();
       }
     });
@@ -130,7 +131,7 @@
     nextBtn.addEventListener("click", () => {
       if (currentIndex < data.length - 1) {
         currentIndex++;
-        showingFront = true;
+        showingFront = true; // Always show front when navigating
         displayCard();
       }
     });
@@ -145,3 +146,4 @@
   </script>
 </body>
 </html>
+
