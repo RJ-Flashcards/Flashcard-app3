@@ -1,11 +1,15 @@
-const sheetURL = 'https://docs.google.com/spreadsheets/d/1AwPGr0h17V5CWTgO4GGk35hD8fr_GDy9uHOjTVIO3n4/export?format=csv&gid=761404854';
-
-
+const baseSheetID = '1AwPGr0h17V5CWTgO4GGk35hD8fr_GDy9uHOjTVIO3n4';
 let flashcards = [];
 let currentCard = 0;
 let isFlipped = false;
 
-function fetchFlashcards() {
+function getSheetURL(gid) {
+  return `https://docs.google.com/spreadsheets/d/${baseSheetID}/export?format=csv&gid=${gid}`;
+}
+
+function fetchFlashcards(gid) {
+  const sheetURL = getSheetURL(gid);
+
   fetch(sheetURL)
     .then(response => {
       if (!response.ok) {
@@ -19,11 +23,13 @@ function fetchFlashcards() {
         const [term, definition] = line.split(',');
         return { term: term.trim(), definition: definition.trim() };
       });
+      currentCard = 0;
       shuffleFlashcards();
       displayCard();
     })
     .catch(error => {
       document.getElementById('card-front').innerText = 'Error loading flashcards.';
+      document.getElementById('card-back').innerText = '';
       console.error('Error:', error);
     });
 }
@@ -43,7 +49,6 @@ function displayCard() {
   front.innerText = card.term;
   back.innerText = card.definition;
 
-  // Keep the card in its current flipped state
   const flashcard = document.getElementById('flashcard');
   if (isFlipped) {
     flashcard.classList.add('flipped');
@@ -52,7 +57,7 @@ function displayCard() {
   }
 }
 
-// ✅ Flip only on card tap (never on button press)
+// Flip card on tap (not button click)
 document.getElementById('flashcard').addEventListener('click', (e) => {
   if (e.target.tagName.toLowerCase() === 'button') {
     e.stopPropagation();
@@ -63,21 +68,28 @@ document.getElementById('flashcard').addEventListener('click', (e) => {
   isFlipped = !isFlipped;
 });
 
-// ✅ Move to next card, preserve flip state
 document.getElementById('next-btn')?.addEventListener('click', (e) => {
   e.stopPropagation();
   currentCard = (currentCard + 1) % flashcards.length;
   displayCard();
 });
 
-// ✅ Move to previous card, preserve flip state
 document.getElementById('back-btn')?.addEventListener('click', (e) => {
   e.stopPropagation();
   currentCard = (currentCard - 1 + flashcards.length) % flashcards.length;
   displayCard();
 });
 
-fetchFlashcards();
+// Sheet selector
+document.getElementById('sheet-select')?.addEventListener('change', (e) => {
+  const selectedGID = e.target.value;
+  isFlipped = false;
+  fetchFlashcards(selectedGID);
+});
+
+// Load initial sheet (Day 1 = gid 0)
+fetchFlashcards('0');
+
 
 
 
