@@ -153,13 +153,6 @@
         });
     }
 
-    function updateCard() {
-      const item = cards[currentCard];
-      front.textContent = item.word;
-      back.textContent = item.definition;
-      card.classList.remove("flipped");
-      showingDefinition = false;
-    }
 
     function nextCard() {
       currentCard = (currentCard + 1) % cards.length;
