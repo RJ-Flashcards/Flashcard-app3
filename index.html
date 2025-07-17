@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Vocabulary Flashcards</title>
   <link rel="stylesheet" href="style-v2.css" />
 </head>
-
 <body>
   <div class="app">
     <h1>Vocabulary Flashcards</h1>
@@ -15,8 +13,8 @@
     <div class="controls">
       <label for="sheet-select">Choose a Day:</label>
       <select id="sheet-select">
-        <option value="0">Day 1</option>
-        <option value="761404854">Day 2</option>
+        <option value="day1">Day 1</option>
+        <option value="day2">Day 2</option>
       </select>
     </div>
 
@@ -34,6 +32,11 @@
   </div>
 
   <script>
+    const urls = {
+      day1: https://docs.google.com/spreadsheets/d/e/2PACX-1vSm6VvHmCWfFh3Av-KM6IvuqcD_UdhNEq6-p_OE3V2e3BHs7boOoRb20Xq73isuU7eyvlqfl9SHNbMv/pub?gid=0&single=true&output=csv
+      day2: https://docs.google.com/spreadsheets/d/e/2PACX-1vSm6VvHmCWfFh3Av-KM6IvuqcD_UdhNEq6-p_OE3V2e3BHs7boOoRb20Xq73isuU7eyvlqfl9SHNbMv/pub?gid=761404854&single=true&output=csv
+    };
+
     const card = document.getElementById("card");
     const front = document.getElementById("card-front");
     const back = document.getElementById("card-back");
@@ -43,13 +46,6 @@
 
     let cards = [];
     let currentCard = 0;
-    let showingDefinition = false;
-
-    const SHEET_ID = "1AwPGr0h17V5CWTgO4GGk35hD8fr_GDy9uHOjTVIO3n4";
-
-    function getSheetURL(sheetGid) {
-      return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${sheetGid}`;
-    }
 
     function shuffle(array) {
       for (let i = array.length - 1; i > 0; i--) {
@@ -58,34 +54,19 @@
       }
     }
 
-    function updateCard() {
-      if (cards.length === 0) {
-        front.textContent = "No cards available.";
-        back.textContent = "";
-        return;
-      }
-
-      const item = cards[currentCard];
-      front.textContent = item.word;
-      back.textContent = item.definition;
-    }
-
-    async function loadSheet(sheetGid) {
-      const url = getSheetURL(sheetGid);
+    async function loadCards(day) {
       front.textContent = "Loading...";
       back.textContent = "";
       try {
-        const response = await fetch(url);
+        const response = await fetch(urls[day]);
         const text = await response.text();
-        const lines = text.trim().split("\n");
-        cards = lines.slice(1).map(line => {
-          const [word, definition] = line.split(/,(.+)/); // Only split on the first comma
+        const lines = text.trim().split("\n").slice(1);
+        cards = lines.map(line => {
+          const [word, definition] = line.split(/,(.+)/);
           return { word: word.trim(), definition: definition.trim() };
         });
         shuffle(cards);
         currentCard = 0;
-        showingDefinition = false;
-        card.classList.remove("flipped");
         updateCard();
       } catch (error) {
         front.textContent = "Error loading cards.";
@@ -94,9 +75,15 @@
       }
     }
 
+    function updateCard() {
+      const item = cards[currentCard];
+      front.textContent = item.word;
+      back.textContent = item.definition;
+      card.classList.remove("flipped");
+    }
+
     card.addEventListener("click", () => {
       card.classList.toggle("flipped");
-      showingDefinition = !showingDefinition;
     });
 
     prevBtn.addEventListener("click", () => {
@@ -114,16 +101,16 @@
     });
 
     sheetSelect.addEventListener("change", (e) => {
-      const selectedGid = e.target.value;
-      loadSheet(selectedGid);
+      const selected = e.target.value;
+      loadCards(selected);
     });
 
-    // Load default tab on startup (Day 1)
-    loadSheet("0");
+    // Load Day 1 by default
+    loadCards("day1");
   </script>
 </body>
-
 </html>
+
 
 
 
