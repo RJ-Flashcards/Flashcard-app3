@@ -2,120 +2,146 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Vocabulary Flashcards</title>
-  <link rel="stylesheet" href="style-v2.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      text-align: center;
+      background-color: #f4f4f4;
+    }
+
+    #controls {
+      margin-bottom: 20px;
+    }
+
+    select, button {
+      font-size: 18px;
+      padding: 10px 20px;
+      margin: 5px;
+      border: none;
+      border-radius: 8px;
+      background-color: #007BFF;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #flashcard {
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      margin: 20px auto;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      font-size: 24px;
+      min-height: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.4s;
+    }
+
+    .flipped {
+      transform: rotateY(180deg);
+      background-color: #e9f5ff;
+    }
+
+    #loading {
+      font-size: 20px;
+    }
+  </style>
 </head>
 <body>
-  <div class="app">
-    <h1>Vocabulary Flashcards</h1>
 
-    <div class="controls">
-      <label for="sheet-select">Choose a Day:</label>
-      <select id="sheet-select">
-        <option value="day1">Day 1</option>
-        <option value="day2">Day 2</option>
-      </select>
-    </div>
+  <h1>Vocabulary Flashcards</h1>
 
-    <div id="card" class="card">
-      <div class="card-inner">
-        <div class="card-front" id="card-front">Loading...</div>
-        <div class="card-back" id="card-back"></div>
-      </div>
-    </div>
-
-    <div class="buttons">
-      <button id="prev">Back</button>
-      <button id="next">Next</button>
-    </div>
+  <div id="controls">
+    <label for="daySelect">Choose a Day:</label>
+    <select id="daySelect">
+      <option value="day1">Day 1</option>
+      <option value="day2">Day 2</option>
+    </select>
   </div>
+
+  <div id="flashcard">Loading...</div>
+  <button id="prevBtn">Back</button>
+  <button id="nextBtn">Next</button>
 
   <script>
     const urls = {
-      day1: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSm6VvHmCWfFh3Av-KM6IvuqcD_UdhNEq6-p_OE3V2e3BHs7boOoRb20Xq73isuU7eyvlqfl9SHNbMv/pub?gid=0&single=true&output=csv"
+      day1: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSm6VvHmCWfFh3Av-KM6IvuqcD_UdhNEq6-p_OE3V2e3BHs7boOoRb20Xq73isuU7eyvlqfl9SHNbMv/pub?gid=0&single=true&output=csv",
       day2: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSm6VvHmCWfFh3Av-KM6IvuqcD_UdhNEq6-p_OE3V2e3BHs7boOoRb20Xq73isuU7eyvlqfl9SHNbMv/pub?gid=761404854&single=true&output=csv"
     };
 
-    const card = document.getElementById("card");
-    const front = document.getElementById("card-front");
-    const back = document.getElementById("card-back");
-    const prevBtn = document.getElementById("prev");
-    const nextBtn = document.getElementById("next");
-    const sheetSelect = document.getElementById("sheet-select");
+    let data = [];
+    let currentIndex = 0;
+    let showingFront = true;
 
-    let cards = [];
-    let currentCard = 0;
+    const flashcard = document.getElementById('flashcard');
+    const daySelect = document.getElementById('daySelect');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
 
-    function shuffle(array) {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-      }
-    }
-
-    async function loadCards(day) {
-      front.textContent = "Loading...";
-      back.textContent = "";
+    async function loadCSV(url) {
+      flashcard.textContent = "Loading...";
       try {
-        const response = await fetch(urls[day]);
+        const response = await fetch(url);
         const text = await response.text();
-        const lines = text.trim().split("\n").slice(1);
-        cards = lines.map(line => {
-          const [word, definition] = line.split(/,(.+)/);
-          return { word: word.trim(), definition: definition.trim() };
-        });
-        shuffle(cards);
-        currentCard = 0;
-        updateCard();
+        data = text.trim().split('\n').map(row => row.split(','));
+        currentIndex = 0;
+        showingFront = true;
+        displayCard();
       } catch (error) {
-        front.textContent = "Error loading cards.";
-        back.textContent = "";
-        console.error("Failed to load sheet:", error);
+        flashcard.textContent = "Error loading cards.";
       }
     }
 
-    function updateCard() {
-      const item = cards[currentCard];
-      front.textContent = item.word;
-      back.textContent = item.definition;
-      card.classList.remove("flipped");
+    function displayCard() {
+      if (data.length === 0 || !data[currentIndex]) {
+        flashcard.textContent = "No cards found.";
+        return;
+      }
+      const [front, back] = data[currentIndex];
+      flashcard.textContent = showingFront ? front : back;
+      flashcard.classList.toggle("flipped", !showingFront);
     }
 
-    card.addEventListener("click", () => {
-      card.classList.toggle("flipped");
+    flashcard.addEventListener("click", () => {
+      showingFront = !showingFront;
+      displayCard();
     });
 
     prevBtn.addEventListener("click", () => {
-      if (currentCard > 0) {
-        currentCard--;
-        updateCard();
+      if (currentIndex > 0) {
+        currentIndex--;
+        showingFront = true;
+        displayCard();
       }
     });
 
     nextBtn.addEventListener("click", () => {
-      if (currentCard < cards.length - 1) {
-        currentCard++;
-        updateCard();
+      if (currentIndex < data.length - 1) {
+        currentIndex++;
+        showingFront = true;
+        displayCard();
       }
     });
 
-    sheetSelect.addEventListener("change", (e) => {
-      const selected = e.target.value;
-      loadCards(selected);
+    daySelect.addEventListener("change", () => {
+      const selectedDay = daySelect.value;
+      loadCSV(urls[selectedDay]);
     });
 
-    // Load Day 1 by default
-    loadCards("day1");
+    // Load Day 1 on startup
+    loadCSV(urls.day1);
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
