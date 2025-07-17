@@ -3,27 +3,146 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Flashcard App</title>
-  <link rel="stylesheet" href="style-v2.css" />
+  <title>Vocabulary Flashcards</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 20px;
+      background-color: #f0f8ff;
+    }
+    #card {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      margin: 20px auto;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      font-size: 24px;
+      cursor: pointer;
+    }
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 18px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    select {
+      margin-bottom: 20px;
+      font-size: 16px;
+      padding: 8px;
+      border-radius: 8px;
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <div class="card" id="flashcard">
-      <div class="card-inner" id="card-inner">
-        <div class="card-front" id="card-front">Loading...</div>
-        <div class="card-back" id="card-back">Please wait</div>
-      </div>
-    </div>
 
-    <div class="buttons">
-      <button id="back-btn">Back</button>
-      <button id="next-btn">Next</button>
-    </div>
+  <h1>Vocabulary Flashcards</h1>
+
+  <label for="sheetSelect">Choose a Day:</label>
+  <select id="sheetSelect">
+    <option value="day1">Day 1</option>
+    <option value="day2">Day 2</option>
+  </select>
+
+  <div id="card">Loading...</div>
+
+  <div class="buttons">
+    <button onclick="prevCard()">Back</button>
+    <button onclick="nextCard()">Next</button>
   </div>
 
-  <script src="script.js"></script>
+  <script>
+    const sheetLinks = {
+      day1: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSm6VvHmCWfFh3Av-KM6IvuqcD_UdhNEq6-p_OE3V2e3BHs7boOoRb20Xq73isuU7eyvlqfl9SHNbMv/pub?gid=0&single=true&output=csv",
+      day2: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSm6VvHmCWfFh3Av-KM6IvuqcD_UdhNEq6-p_OE3V2e3BHs7boOoRb20Xq73isuU7eyvlqfl9SHNbMv/pub?gid=761404854&single=true&output=csv"
+    };
+
+    let cards = [];
+    let currentCard = 0;
+    let showingDefinition = false;
+
+    const cardEl = document.getElementById("card");
+    const sheetSelect = document.getElementById("sheetSelect");
+
+    sheetSelect.addEventListener("change", () => {
+      loadSheet(sheetSelect.value);
+    });
+
+    function loadSheet(dayKey) {
+      const url = sheetLinks[dayKey];
+      fetch(url)
+        .then(response => response.text())
+        .then(csv => {
+          const rows = csv.trim().split("\n").slice(1);
+          cards = rows.map(row => {
+            const [word, definition] = row.split(",");
+            return { word: word.trim(), definition: definition.trim() };
+          });
+          shuffle(cards);
+          currentCard = 0;
+          showingDefinition = false;
+          displayCard();
+        })
+        .catch(err => {
+          cardEl.innerText = "Failed to load data.";
+          console.error(err);
+        });
+    }
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    function displayCard() {
+      if (cards.length === 0) {
+        cardEl.innerText = "No cards available.";
+        return;
+      }
+      const card = cards[currentCard];
+      cardEl.innerText = showingDefinition ? card.definition : card.word;
+    }
+
+    function nextCard() {
+      currentCard = (currentCard + 1) % cards.length;
+      showingDefinition = false;
+      displayCard();
+    }
+
+    function prevCard() {
+      currentCard = (currentCard - 1 + cards.length) % cards.length;
+      showingDefinition = false;
+      displayCard();
+    }
+
+    cardEl.addEventListener("click", () => {
+      showingDefinition = !showingDefinition;
+      displayCard();
+    });
+
+    // Load default sheet on page load
+    window.onload = () => {
+      loadSheet("day1");
+    };
+  </script>
 </body>
 </html>
+
 
 
 
