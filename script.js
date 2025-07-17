@@ -1,12 +1,15 @@
-const baseSheetID = '1AwPGr0h17V5CWTgO4GGk35hD8fr_GDy9uHOjTVIO3n4';
+const baseSheetID = '1AwPGr0h17V5CWTgO4GGk35hD8fr_GDy9uHOjTVIO3n4'; // Google Sheet ID
+
 let flashcards = [];
 let currentCard = 0;
 let isFlipped = false;
 
+// Get CSV link for selected sheet tab
 function getSheetURL(gid) {
   return `https://docs.google.com/spreadsheets/d/${baseSheetID}/export?format=csv&gid=${gid}`;
 }
 
+// Fetch flashcards and parse
 function fetchFlashcards(gid) {
   const sheetURL = getSheetURL(gid);
 
@@ -19,10 +22,18 @@ function fetchFlashcards(gid) {
     })
     .then(data => {
       const lines = data.trim().split('\n');
-      flashcards = lines.slice(1).map(line => {
+
+      // Remove the header row
+      const rawCards = lines.slice(1);
+
+      flashcards = rawCards.map(line => {
         const [term, definition] = line.split(',');
-        return { term: term.trim(), definition: definition.trim() };
+        return {
+          term: (term || '').trim(),
+          definition: (definition || '').trim()
+        };
       });
+
       currentCard = 0;
       shuffleFlashcards();
       displayCard();
@@ -34,6 +45,7 @@ function fetchFlashcards(gid) {
     });
 }
 
+// Shuffle cards randomly
 function shuffleFlashcards() {
   for (let i = flashcards.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -41,6 +53,7 @@ function shuffleFlashcards() {
   }
 }
 
+// Display front and back of the current card
 function displayCard() {
   const front = document.getElementById('card-front');
   const back = document.getElementById('card-back');
@@ -50,49 +63,40 @@ function displayCard() {
   back.innerText = card.definition;
 
   const flashcard = document.getElementById('flashcard');
-  if (isFlipped) {
-    flashcard.classList.add('flipped');
-  } else {
-    flashcard.classList.remove('flipped');
-  }
+  flashcard.classList.toggle('flipped', isFlipped);
 }
 
-// Flip card on tap (not button click)
+// Flip card when user taps the flashcard (but not buttons)
 document.getElementById('flashcard').addEventListener('click', (e) => {
   if (e.target.tagName.toLowerCase() === 'button') {
-    e.stopPropagation();
     return;
   }
-  const flashcard = document.getElementById('flashcard');
-  flashcard.classList.toggle('flipped');
   isFlipped = !isFlipped;
+  displayCard();
 });
 
+// Next button
 document.getElementById('next-btn')?.addEventListener('click', (e) => {
   e.stopPropagation();
+  isFlipped = false;
   currentCard = (currentCard + 1) % flashcards.length;
   displayCard();
 });
 
+// Back button
 document.getElementById('back-btn')?.addEventListener('click', (e) => {
   e.stopPropagation();
+  isFlipped = false;
   currentCard = (currentCard - 1 + flashcards.length) % flashcards.length;
   displayCard();
 });
 
-// Sheet selector
+// Dropdown to select sheet tab
 document.getElementById('sheet-select')?.addEventListener('change', (e) => {
   const selectedGID = e.target.value;
   isFlipped = false;
   fetchFlashcards(selectedGID);
 });
 
-// Load initial sheet (Day 1 = gid 0)
+// Load Day 1 by default (gid=0)
 fetchFlashcards('0');
-
-
-
-
-
-
-
