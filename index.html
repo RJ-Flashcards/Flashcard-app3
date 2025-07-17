@@ -2,155 +2,37 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Vocabulary Flashcards</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      text-align: center;
-      background-color: #f4f4f4;
-    }
-
-    #controls {
-      margin-bottom: 20px;
-    }
-
-    select, button {
-      font-size: 18px;
-      padding: 12px 24px;
-      margin: 5px;
-      border: none;
-      border-radius: 8px;
-      background-color: #007BFF;
-      color: white;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #0056b3;
-    }
-
-    #flashcard {
-      background: white;
-      border: 4px solid forestgreen;
-      border-radius: 20px;
-      padding: 50px;
-      margin: 20px auto;
-      width: 95%;
-      max-width: 480px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      font-size: 28px;
-      min-height: 180px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      user-select: none;
-      transition: transform 0.4s;
-    }
-
-    .flipped {
-      background-color: #e9f5ff;
-    }
-
-    #loading {
-      font-size: 20px;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
   <h1>Vocabulary Flashcards</h1>
 
   <div id="controls">
-    <label for="daySelect">Choose a Day:</label>
-    <select id="daySelect">
-      <option value="day1">Day 1</option>
-      <option value="day2">Day 2</option>
+    <label for="sheet-select">Choose a Day:</label>
+    <select id="sheet-select">
+      <option value="0">Day 1</option>
+      <option value="761404854">Day 2</option>
     </select>
   </div>
 
-  <div id="flashcard">Loading...</div>
-  <button id="prevBtn">Back</button>
-  <button id="nextBtn">Next</button>
+  <div class="flashcard" id="flashcard">
+    <div class="flashcard-inner">
+      <div class="flashcard-front" id="card-front">Loading...</div>
+      <div class="flashcard-back" id="card-back"></div>
+    </div>
+  </div>
 
-  <script>
-    const urls = {
-      day1: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSm6VvHmCWfFh3Av-KM6IvuqcD_UdhNEq6-p_OE3V2e3BHs7boOoRb20Xq73isuU7eyvlqfl9SHNbMv/pub?gid=0&single=true&output=csv",
-      day2: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSm6VvHmCWfFh3Av-KM6IvuqcD_UdhNEq6-p_OE3V2e3BHs7boOoRb20Xq73isuU7eyvlqfl9SHNbMv/pub?gid=761404854&single=true&output=csv"
-    };
+  <div class="buttons">
+    <button id="back-btn">Back</button>
+    <button id="next-btn">Next</button>
+  </div>
 
-    let data = [];
-    let currentIndex = 0;
-    let showingFront = true;
-
-    const flashcard = document.getElementById('flashcard');
-    const daySelect = document.getElementById('daySelect');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-
-    async function loadCSV(url) {
-      flashcard.textContent = "Loading...";
-      try {
-        const response = await fetch(url);
-        const text = await response.text();
-        const rows = text.trim().split('\n').slice(1); // skip header
-        data = rows.map(row => {
-          const [word, definition] = row.split(',');
-          return [word?.trim(), definition?.trim()];
-        });
-        currentIndex = 0;
-        showingFront = true;
-        displayCard();
-      } catch (error) {
-        flashcard.textContent = "Error loading cards.";
-      }
-    }
-
-    function displayCard() {
-      if (data.length === 0 || !data[currentIndex]) {
-        flashcard.textContent = "No cards found.";
-        return;
-      }
-      const [word, definition] = data[currentIndex];
-      flashcard.textContent = showingFront ? word : definition;
-      flashcard.classList.toggle("flipped", !showingFront);
-    }
-
-    flashcard.addEventListener("click", () => {
-      showingFront = !showingFront;
-      displayCard();
-    });
-
-    prevBtn.addEventListener("click", () => {
-      if (currentIndex > 0) {
-        currentIndex--;
-        showingFront = true;
-        displayCard();
-      }
-    });
-
-    nextBtn.addEventListener("click", () => {
-      if (currentIndex < data.length - 1) {
-        currentIndex++;
-        showingFront = true;
-        displayCard();
-      }
-    });
-
-    daySelect.addEventListener("change", () => {
-      const selectedDay = daySelect.value;
-      loadCSV(urls[selectedDay]);
-    });
-
-    // Load Day 1 on startup
-    window.onload = () => {
-      daySelect.value = "day1";
-      loadCSV(urls.day1);
-    };
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
+
 
 
