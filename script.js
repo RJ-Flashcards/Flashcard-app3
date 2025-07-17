@@ -1,4 +1,5 @@
-const sheetURL = https://docs.google.com/spreadsheets/d/e/2PACX-1vSm6VvHmCWfFh3Av-KM6IvuqcD_UdhNEq6-p_OE3V2e3BHs7boOoRb20Xq73isuU7eyvlqfl9SHNbMv/pub?output=csv;
+const sheetURL = 'https://docs.google.com/spreadsheets/d/1AwPGr0h17V5CWTgO4GGk35hD8fr_GDy9uHOjTVIO3n4/export?format=csv&gid=761404854';
+
 
 let flashcards = [];
 let currentCard = 0;
