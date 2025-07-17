@@ -95,8 +95,11 @@
       try {
         const response = await fetch(url);
         const text = await response.text();
-        const rows = text.trim().split('\n').slice(1); // Remove header
-        data = rows.map(row => row.split(','));
+        const rows = text.trim().split('\n').slice(1); // skip header
+        data = rows.map(row => {
+          const [word, definition] = row.split(',');
+          return [word?.trim(), definition?.trim()];
+        });
         currentIndex = 0;
         showingFront = true;
         displayCard();
@@ -123,7 +126,7 @@
     prevBtn.addEventListener("click", () => {
       if (currentIndex > 0) {
         currentIndex--;
-        showingFront = true; // Always show front when navigating
+        showingFront = true;
         displayCard();
       }
     });
@@ -131,7 +134,7 @@
     nextBtn.addEventListener("click", () => {
       if (currentIndex < data.length - 1) {
         currentIndex++;
-        showingFront = true; // Always show front when navigating
+        showingFront = true;
         displayCard();
       }
     });
@@ -142,8 +145,12 @@
     });
 
     // Load Day 1 on startup
-    loadCSV(urls.day1);
+    window.onload = () => {
+      daySelect.value = "day1";
+      loadCSV(urls.day1);
+    };
   </script>
 </body>
 </html>
+
 
