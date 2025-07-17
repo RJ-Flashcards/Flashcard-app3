@@ -153,6 +153,12 @@
         });
     }
 
+    function updateCard() {
+  const item = cards[currentCard];
+  front.textContent = item.word;
+  back.textContent = item.definition;
+  // Leave the card's flipped state as-is
+}
 
     function nextCard() {
       currentCard = (currentCard + 1) % cards.length;
