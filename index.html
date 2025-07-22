@@ -70,11 +70,22 @@
     .buttons button:hover {
       background-color: #0056b3;
     }
+    #sheetSelector {
+      font-size: 16px;
+      padding: 8px;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
 
   <h1>Vocabulary Flashcards</h1>
+
+  <!-- This dropdown will work now on mobile too -->
+  <select id="sheetSelector">
+    <option value="1">Day 1</option>
+    <option value="2">Day 2</option>
+  </select>
 
   <div class="flashcard-container">
     <div class="flashcard" id="flashcard">
@@ -89,27 +100,37 @@
   </div>
 
   <script>
-    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSm6VvHmCWfFh3Av-KM6IvuqcD_UdhNEq6-p_OE3V2e3BHs7boOoRb20Xq73isuU7eyvlqfl9SHNbMv/pub?output=csv';
-
-    let cards = [];
-    let currentIndex = 0;
-
+    const sheetSelector = document.getElementById('sheetSelector');
     const flashcard = document.getElementById('flashcard');
     const cardFront = document.getElementById('card-front');
     const cardBack = document.getElementById('card-back');
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
 
-    async function loadCSV() {
+    let cards = [];
+    let currentIndex = 0;
+
+    // Your published spreadsheet ID (change this if needed)
+    const SHEET_ID = '2PACX-1vSm6VvHmCWfFh3Av-KM6IvuqcD_UdhNEq6-p_OE3V2e3BHs7boOoRb20Xq73isuU7eyvlqfl9SHNbMv';
+
+    function getCSVUrl(sheetNumber) {
+      return `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/pub?gid=${sheetNumber === "1" ? "0" : "123456789"}&single=true&output=csv`;
+    }
+
+    async function loadCSV(sheetNumber = "1") {
+      const csvUrl = getCSVUrl(sheetNumber);
       cardFront.textContent = "Loading...";
       cardBack.textContent = "";
+
       try {
-        const res = await fetch(CSV_URL);
+        const res = await fetch(csvUrl);
         const text = await res.text();
-        const rows = text.trim().split('\n').slice(1); // skip header row
+        const rows = text.trim().split('\n').slice(1); // skip header
         cards = rows.map(r => {
-          const [term, def] = r.split(/,(.+)/); // split only on first comma
-          return { term: term.trim(), def: def.trim() };
+          const parts = r.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g); // safe split
+          const word = parts[0].replace(/^"|"$/g, '').trim();
+          const def = parts[1] ? parts[1].replace(/^"|"$/g, '').trim() : '';
+          return { term: word, def: def };
         });
         currentIndex = 0;
         showCard();
@@ -122,7 +143,7 @@
       if (!cards[currentIndex]) return;
       const { term, def } = cards[currentIndex];
       cardFront.textContent = term;
-      cardBack.textContent = def;
+      cardBack.textContent = def || "(No definition found)";
       flashcard.classList.remove('flipped');
     }
 
@@ -140,12 +161,17 @@
       showCard();
     });
 
-    // initialize
-    loadCSV();
+    sheetSelector.addEventListener('change', (e) => {
+      loadCSV(e.target.value);
+    });
+
+    // Load default sheet
+    loadCSV("1");
   </script>
 
 </body>
 </html>
+
 
 
 
