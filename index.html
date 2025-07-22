@@ -7,68 +7,85 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      padding: 20px;
       text-align: center;
-      background-color: #f4f4f4;
+      background-color: #f0f8ff;
       margin: 0;
+      padding: 20px;
     }
+
+    #controls {
+      margin-bottom: 20px;
+    }
+
+    select {
+      font-size: 18px;
+      padding: 12px 24px;
+      margin: 5px;
+      border: none;
+      border-radius: 8px;
+      background-color: #007BFF;
+      color: white;
+      cursor: pointer;
+      appearance: auto;
+    }
+
     .flashcard-container {
       perspective: 1000px;
+      margin: auto;
       width: 90%;
       max-width: 400px;
-      margin: 20px auto;
-    }
-    .flashcard {
-      width: 100%;
-      height: 300px;
+      height: 250px;
       border: 4px solid forestgreen;
-      border-radius: 20px;
-      background-color: white;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      transform-style: preserve-3d;
-      transition: transform 0.6s;
-      cursor: pointer;
-      overflow: hidden;
+      border-radius: 16px;
       position: relative;
     }
-    .flashcard.flipped {
+
+    .flashcard {
+      width: 100%;
+      height: 100%;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .flashcard.is-flipped {
       transform: rotateY(180deg);
     }
-    .card-face {
+
+    .flashcard-side {
       position: absolute;
       width: 100%;
       height: 100%;
       backface-visibility: hidden;
+      background: white;
+      color: black;
       display: flex;
       align-items: center;
       justify-content: center;
+      font-size: 24px;
       padding: 20px;
       box-sizing: border-box;
-      font-size: 24px;
-      border-radius: 20px;
-      background-color: white;
+      border-radius: 12px;
     }
-    .card-back {
+
+    .flashcard-back {
       transform: rotateY(180deg);
-      background-color: #e9f5ff;
     }
-    .buttons {
-      margin-top: 10px;
+
+    .nav-buttons {
+      margin-top: 20px;
     }
-    .buttons button {
-      min-width: 140px;
-      padding: 12px 24px;
-      margin: 5px;
-      font-size: 18px;
-      background-color: #007BFF;
-      color: white;
+
+    .nav-buttons button {
+      font-size: 20px;
+      padding: 10px 30px;
+      margin: 0 10px;
       border: none;
       border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      background-color: #007BFF;
+      color: white;
       cursor: pointer;
-    }
-    .buttons button:hover {
-      background-color: #0056b3;
     }
   </style>
 </head>
@@ -76,76 +93,93 @@
 
   <h1>Vocabulary Flashcards</h1>
 
-  <div class="flashcard-container">
+  <div id="controls">
+    <label for="sheetSelect">Choose a day:</label>
+    <select id="sheetSelect">
+      <option value="0">Day 1</option>
+      <option value="761404854">Day 2</option>
+    </select>
+  </div>
+
+  <div class="flashcard-container" id="flashcardContainer">
     <div class="flashcard" id="flashcard">
-      <div class="card-face card-front" id="card-front">Loading...</div>
-      <div class="card-face card-back" id="card-back"></div>
+      <div class="flashcard-side flashcard-front" id="flashcardFront">Loading...</div>
+      <div class="flashcard-side flashcard-back" id="flashcardBack"></div>
     </div>
   </div>
 
-  <div class="buttons">
-    <button id="prevBtn">Back</button>
-    <button id="nextBtn">Next</button>
+  <div class="nav-buttons">
+    <button id="prevButton">Back</button>
+    <button id="nextButton">Next</button>
   </div>
 
   <script>
-    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSm6VvHmCWfFh3Av-KM6IvuqcD_UdhNEq6-p_OE3V2e3BHs7boOoRb20Xq73isuU7eyvlqfl9SHNbMv/pub?output=csv';
+    const flashcard = document.getElementById('flashcard');
+    const flashcardFront = document.getElementById('flashcardFront');
+    const flashcardBack = document.getElementById('flashcardBack');
+    const sheetSelect = document.getElementById('sheetSelect');
 
-    let cards = [];
+    const csvBaseUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSm6VvHmCWfFh3Av-KM6IvuqcD_UdhNEq6-p_OE3V2e3BHs7boOoRb20Xq73isuU7eyvlqfl9SHNbMv/pub?output=csv&gid=';
+
+    let currentDeck = [];
     let currentIndex = 0;
 
-    const flashcard = document.getElementById('flashcard');
-    const cardFront = document.getElementById('card-front');
-    const cardBack = document.getElementById('card-back');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-
-    async function loadCSV() {
-      cardFront.textContent = "Loading...";
-      cardBack.textContent = "";
-      try {
-        const res = await fetch(CSV_URL);
-        const text = await res.text();
-        const rows = text.trim().split('\n').slice(1); // skip header row
-        cards = rows.map(r => {
-          const [term, def] = r.split(/,(.+)/); // split only on first comma
-          return { term: term.trim(), def: def.trim() };
+    function loadSheet(gid) {
+      fetch(csvBaseUrl + gid)
+        .then(response => response.text())
+        .then(data => {
+          const rows = data.split('\n').slice(1); // Skip header
+          currentDeck = rows
+            .map(row => {
+              const [word, definition] = row.split(',').map(cell => cell.trim());
+              return { word, definition };
+            })
+            .filter(card => card.word && card.definition);
+          currentIndex = 0;
+          updateFlashcard();
         });
-        currentIndex = 0;
-        showCard();
-      } catch (e) {
-        cardFront.textContent = "Error loading flashcards.";
-      }
     }
 
-    function showCard() {
-      if (!cards[currentIndex]) return;
-      const { term, def } = cards[currentIndex];
-      cardFront.textContent = term;
-      cardBack.textContent = def;
-      flashcard.classList.remove('flipped');
+    function updateFlashcard() {
+      const currentCard = currentDeck[currentIndex];
+      flashcardFront.textContent = currentCard.word;
+      flashcardBack.textContent = currentCard.definition;
+      flashcard.classList.remove('is-flipped');
     }
+
+    document.getElementById('nextButton').addEventListener('click', () => {
+      if (currentIndex < currentDeck.length - 1) {
+        currentIndex++;
+      } else {
+        currentIndex = 0;
+      }
+      updateFlashcard();
+    });
+
+    document.getElementById('prevButton').addEventListener('click', () => {
+      if (currentIndex > 0) {
+        currentIndex--;
+      } else {
+        currentIndex = currentDeck.length - 1;
+      }
+      updateFlashcard();
+    });
 
     flashcard.addEventListener('click', () => {
-      flashcard.classList.toggle('flipped');
+      flashcard.classList.toggle('is-flipped');
     });
 
-    prevBtn.addEventListener('click', () => {
-      currentIndex = (currentIndex - 1 + cards.length) % cards.length;
-      showCard();
+    sheetSelect.addEventListener('change', (e) => {
+      loadSheet(e.target.value);
     });
 
-    nextBtn.addEventListener('click', () => {
-      currentIndex = (currentIndex + 1) % cards.length;
-      showCard();
-    });
-
-    // initialize
-    loadCSV();
+    // Load default (Day 1)
+    loadSheet(sheetSelect.value);
   </script>
-
 </body>
 </html>
+
+
 
 
 
