@@ -7,17 +7,15 @@
   <style>
     body {
       font-family: Arial, sans-serif;
+      padding: 16px;
       text-align: center;
-      background-color: #f0f8ff;
+      background-color: #f4f4f4;
       margin: 0;
-      padding: 20px;
     }
-
     #controls {
       margin-bottom: 20px;
     }
-
-    select {
+    select, button {
       font-size: 18px;
       padding: 12px 24px;
       margin: 5px;
@@ -26,158 +24,186 @@
       background-color: #007BFF;
       color: white;
       cursor: pointer;
-      appearance: auto;
+      user-select: none;
     }
-
-    .flashcard-container {
+    button:hover, select:hover {
+      background-color: #0056b3;
+    }
+    .card-container {
       perspective: 1000px;
-      margin: auto;
-      width: 90%;
-      max-width: 400px;
-      height: 250px;
-      border: 4px solid forestgreen;
-      border-radius: 16px;
-      position: relative;
+      width: 95%;
+      max-width: 420px;
+      margin: 20px auto;
     }
-
     .flashcard {
       width: 100%;
-      height: 100%;
-      transition: transform 0.6s;
-      transform-style: preserve-3d;
+      height: 280px;
       position: relative;
+      border: 4px solid forestgreen;
+      border-radius: 20px;
+      background-color: transparent;
+      box-sizing: border-box;
+      transition: box-shadow 0.3s;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.13);
       cursor: pointer;
     }
-
-    .flashcard.is-flipped {
+    .flashcard-inner {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.6s;
+      border-radius: 20px;
+    }
+    .flashcard.flipped .flashcard-inner {
       transform: rotateY(180deg);
     }
-
-    .flashcard-side {
+    .card-face {
       position: absolute;
       width: 100%;
       height: 100%;
-      backface-visibility: hidden;
-      background: white;
-      color: black;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
+      font-size: 26px;
       padding: 20px;
+      border-radius: 20px;
       box-sizing: border-box;
-      border-radius: 12px;
+      background-color: white;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      word-break: break-word;
     }
-
-    .flashcard-back {
+    .front {
+      /* No transform, front face */
+    }
+    .back {
+      background-color: #e9f5ff;
       transform: rotateY(180deg);
     }
-
-    .nav-buttons {
-      margin-top: 20px;
+    .buttons {
+      margin-top: 14px;
+      display: flex;
+      justify-content: center;
+      gap: 16px;
     }
-
-    .nav-buttons button {
-      font-size: 20px;
-      padding: 10px 30px;
-      margin: 0 10px;
-      border: none;
-      border-radius: 8px;
-      background-color: #007BFF;
-      color: white;
-      cursor: pointer;
+    .buttons button {
+      min-width: 130px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.13);
+      transition: background-color 0.3s ease;
+    }
+    @media (max-width: 600px) {
+      .card-container { max-width: 98vw; }
+      .flashcard { height: 220px; }
+      .card-face { font-size: 20px; }
     }
   </style>
 </head>
 <body>
-
   <h1>Vocabulary Flashcards</h1>
-
   <div id="controls">
-    <label for="sheetSelect">Choose a day:</label>
-    <select id="sheetSelect">
-      <option value="0">Day 1</option>
-      <option value="761404854">Day 2</option>
+    <label for="daySelect">Choose a Day:</label>
+    <select id="daySelect">
+      <option value="day1">Day 1</option>
+      <option value="day2">Day 2</option>
     </select>
   </div>
-
-  <div class="flashcard-container" id="flashcardContainer">
+  <div class="card-container">
     <div class="flashcard" id="flashcard">
-      <div class="flashcard-side flashcard-front" id="flashcardFront">Loading...</div>
-      <div class="flashcard-side flashcard-back" id="flashcardBack"></div>
+      <div class="flashcard-inner">
+        <div class="card-face front" id="card-front">Loading...</div>
+        <div class="card-face back" id="card-back"></div>
+      </div>
     </div>
   </div>
-
-  <div class="nav-buttons">
-    <button id="prevButton">Back</button>
-    <button id="nextButton">Next</button>
+  <div class="buttons">
+    <button id="prevBtn">Back</button>
+    <button id="nextBtn">Next</button>
   </div>
-
   <script>
-    const flashcard = document.getElementById('flashcard');
-    const flashcardFront = document.getElementById('flashcardFront');
-    const flashcardBack = document.getElementById('flashcardBack');
-    const sheetSelect = document.getElementById('sheetSelect');
-
-    const csvBaseUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSm6VvHmCWfFh3Av-KM6IvuqcD_UdhNEq6-p_OE3V2e3BHs7boOoRb20Xq73isuU7eyvlqfl9SHNbMv/pub?output=csv&gid=';
-
-    let currentDeck = [];
+    // --- CSV URLs for your Days ---
+    const urls = {
+      day1: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSm6VvHmCWfFh3Av-KM6IvuqcD_UdhNEq6-p_OE3V2e3BHs7boOoRb20Xq73isuU7eyvlqfl9SHNbMv/pub?gid=0&single=true&output=csv",
+      day2: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSm6VvHmCWfFh3Av-KM6IvuqcD_UdhNEq6-p_OE3V2e3BHs7boOoRb20Xq73isuU7eyvlqfl9SHNbMv/pub?gid=761404854&single=true&output=csv"
+    };
+    let data = [];
     let currentIndex = 0;
+    let showingFront = true; // true = word, false = definition
 
-    function loadSheet(gid) {
-      fetch(csvBaseUrl + gid)
-        .then(response => response.text())
-        .then(data => {
-          const rows = data.split('\n').slice(1); // Skip header
-          currentDeck = rows
-            .map(row => {
-              const [word, definition] = row.split(',').map(cell => cell.trim());
-              return { word, definition };
-            })
-            .filter(card => card.word && card.definition);
-          currentIndex = 0;
-          updateFlashcard();
+    const daySelect = document.getElementById("daySelect");
+    const flashcard = document.getElementById("flashcard");
+    const cardInner = flashcard.querySelector('.flashcard-inner');
+    const cardFront = document.getElementById("card-front");
+    const cardBack = document.getElementById("card-back");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+
+    // Load the CSV and show first card
+    async function loadCSV(url) {
+      cardFront.textContent = "Loading...";
+      cardBack.textContent = "";
+      try {
+        const response = await fetch(url);
+        const text = await response.text();
+        // skip header
+        const rows = text.trim().split("\n").slice(1);
+        data = rows.map(row => {
+          const [word, definition] = row.split(",");
+          return [word?.trim(), definition?.trim()];
         });
-    }
-
-    function updateFlashcard() {
-      const currentCard = currentDeck[currentIndex];
-      flashcardFront.textContent = currentCard.word;
-      flashcardBack.textContent = currentCard.definition;
-      flashcard.classList.remove('is-flipped');
-    }
-
-    document.getElementById('nextButton').addEventListener('click', () => {
-      if (currentIndex < currentDeck.length - 1) {
-        currentIndex++;
-      } else {
         currentIndex = 0;
+        showingFront = true;
+        flashcard.classList.remove("flipped");
+        displayCard();
+      } catch (err) {
+        cardFront.textContent = "Error loading flashcards.";
+        cardBack.textContent = "";
       }
-      updateFlashcard();
+    }
+
+    function displayCard() {
+      if (!data[currentIndex]) return;
+      const [word, definition] = data[currentIndex];
+      cardFront.textContent = word;
+      cardBack.textContent = definition;
+      // keep current flip state (showingFront) and don't change the class
+    }
+
+    flashcard.addEventListener("click", function (e) {
+      // Only flip if the inner card or face is clicked
+      if (e.target.closest('.buttons')) return;
+      showingFront = !showingFront;
+      flashcard.classList.toggle("flipped");
     });
 
-    document.getElementById('prevButton').addEventListener('click', () => {
-      if (currentIndex > 0) {
-        currentIndex--;
-      } else {
-        currentIndex = currentDeck.length - 1;
-      }
-      updateFlashcard();
+    prevBtn.addEventListener("click", function () {
+      if (data.length === 0) return;
+      currentIndex = (currentIndex - 1 + data.length) % data.length;
+      displayCard();
+      // Do not change flip state!
     });
 
-    flashcard.addEventListener('click', () => {
-      flashcard.classList.toggle('is-flipped');
+    nextBtn.addEventListener("click", function () {
+      if (data.length === 0) return;
+      currentIndex = (currentIndex + 1) % data.length;
+      displayCard();
+      // Do not change flip state!
     });
 
-    sheetSelect.addEventListener('change', (e) => {
-      loadSheet(e.target.value);
+    daySelect.addEventListener("change", function () {
+      // Always start on front side when switching decks
+      loadCSV(urls[daySelect.value]);
     });
 
-    // Load default (Day 1)
-    loadSheet(sheetSelect.value);
+    // On page load: default to Day 1
+    window.onload = function () {
+      daySelect.value = "day1";
+      loadCSV(urls.day1);
+    };
   </script>
 </body>
 </html>
+
 
 
 
