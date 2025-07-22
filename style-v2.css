@@ -39,17 +39,18 @@ button:hover, select:hover {
   border-radius: 20px;
   box-sizing: border-box;
   position: relative;
-  overflow: hidden; /* ✅ keeps white inside */
-  background-color: transparent; /* ✅ prevents white bleed */
+  background-color: transparent;
+  /* ✅ removed overflow: hidden here */
 }
 
 .flashcard-inner {
   width: 100%;
   height: 100%;
-  position: absolute;
+  position: relative;
   transform-style: preserve-3d;
   transition: transform 0.6s;
   border-radius: 20px;
+  overflow: hidden; /* ✅ moved overflow here */
 }
 
 .flashcard.flipped .flashcard-inner {
@@ -66,20 +67,16 @@ button:hover, select:hover {
   align-items: center;
   justify-content: center;
   font-size: 24px;
-  padding: 16px; /* ✅ slightly reduced padding */
+  padding: 16px;
   box-sizing: border-box;
-  border-radius: 20px;
-  overflow: hidden; /* ✅ prevents text from overflowing */
+  border-radius: 0; /* ✅ no extra radius here */
+  background-color: white;
   user-select: none;
 }
 
-.flashcard-front {
-  background-color: white;
-}
-
 .flashcard-back {
-  background-color: #e9f5ff;
   transform: rotateY(180deg);
+  background-color: #e9f5ff;
 }
 
 /* Buttons container */
