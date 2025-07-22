@@ -39,9 +39,9 @@ button:hover, select:hover {
   border-radius: 20px;
   box-sizing: border-box;
   position: relative;
-  overflow: hidden; /* ✅ this line prevents white from spilling */
+  overflow: hidden; /* ✅ keeps white inside */
+  background-color: transparent; /* ✅ prevents white bleed */
 }
-
 
 .flashcard-inner {
   width: 100%;
@@ -50,7 +50,6 @@ button:hover, select:hover {
   transform-style: preserve-3d;
   transition: transform 0.6s;
   border-radius: 20px;
-  overflow: hidden;
 }
 
 .flashcard.flipped .flashcard-inner {
@@ -67,18 +66,20 @@ button:hover, select:hover {
   align-items: center;
   justify-content: center;
   font-size: 24px;
-  padding: 20px;
+  padding: 16px; /* ✅ slightly reduced padding */
   box-sizing: border-box;
-  background-color: white;
   border-radius: 20px;
+  overflow: hidden; /* ✅ prevents text from overflowing */
   user-select: none;
-  overflow: hidden;
+}
+
+.flashcard-front {
+  background-color: white;
 }
 
 .flashcard-back {
-  transform: rotateY(180deg);
   background-color: #e9f5ff;
-backface-visibility: hidden;
+  transform: rotateY(180deg);
 }
 
 /* Buttons container */
@@ -91,6 +92,3 @@ backface-visibility: hidden;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   transition: background-color 0.3s ease;
 }
-
-
-
