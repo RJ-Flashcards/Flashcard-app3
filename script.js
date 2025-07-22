@@ -1,58 +1,83 @@
-const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSm6VvHmCWfFh3Av-KM6IvuqcD_UdhNEq6-p_OE3V2e3BHs7boOoRb20Xq73isuU7eyvlqfl9SHNbMv/pub?output=csv";
+
+const sheetURL = 'https://raw.githubusercontent.com/RJ-Flashcards/Flashcard-app3/main/vocab.csv';
 
 let flashcards = [];
-let currentIndex = 0;
-let flipped = false;
+let currentCard = 0;
+let isFlipped = false;
 
-const flashcard = document.querySelector(".flashcard");
-const flashcardFront = document.getElementById("flashcard-front");
-const flashcardBack = document.getElementById("flashcard-back");
-const flashcardInner = document.getElementById("flashcard-inner");
-
-async function loadFlashcards() {
-  try {
-    const response = await fetch(sheetUrl);
-    const data = await response.text();
-    const rows = data.trim().split("\n").slice(1); // skip header
-
-    flashcards = rows.map(row => {
-      const [word, definition] = row.split(",");
-      return { word: word.trim(), definition: definition.trim() };
+function fetchFlashcards() {
+  fetch(sheetURL)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to fetch CSV');
+      }
+      return response.text();
+    })
+    .then(data => {
+      const lines = data.trim().split('\n');
+      flashcards = lines.slice(1).map(line => {
+        const [term, definition] = line.split(',');
+        return { term: term.trim(), definition: definition.trim() };
+      });
+      shuffleFlashcards();
+      displayCard();
+    })
+    .catch(error => {
+      document.getElementById('card-front').innerText = 'Error loading flashcards.';
+      console.error('Error:', error);
     });
+}
 
-    showCard();
-  } catch (error) {
-    flashcardFront.textContent = "Error loading flashcards";
-    flashcardBack.textContent = "";
-    console.error("Failed to load flashcards:", error);
+function shuffleFlashcards() {
+  for (let i = flashcards.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [flashcards[i], flashcards[j]] = [flashcards[j], flashcards[i]];
   }
 }
 
-function showCard() {
-  const card = flashcards[currentIndex];
-  flashcardFront.textContent = card.word;
-  flashcardBack.textContent = card.definition;
+function displayCard() {
+  const front = document.getElementById('card-front');
+  const back = document.getElementById('card-back');
+  const card = flashcards[currentCard];
+
+  front.innerText = card.term;
+  back.innerText = card.definition;
+
+  // Keep the card in its current flipped state
+  const flashcard = document.getElementById('flashcard');
+  if (isFlipped) {
+    flashcard.classList.add('flipped');
+  } else {
+    flashcard.classList.remove('flipped');
+  }
 }
 
-function flipCard() {
-  flipped = !flipped;
-  flashcard.classList.toggle("flipped", flipped);
-}
+// ✅ Flip only on card tap (never on button press)
+document.getElementById('flashcard').addEventListener('click', (e) => {
+  if (e.target.tagName.toLowerCase() === 'button') {
+    e.stopPropagation();
+    return;
+  }
+  const flashcard = document.getElementById('flashcard');
+  flashcard.classList.toggle('flipped');
+  isFlipped = !isFlipped;
+});
 
-function nextCard() {
-  currentIndex = (currentIndex + 1) % flashcards.length;
-  flipped = false;
-  flashcard.classList.remove("flipped");
-  showCard();
-}
+// ✅ Move to next card, preserve flip state
+document.getElementById('next-btn')?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  currentCard = (currentCard + 1) % flashcards.length;
+  displayCard();
+});
 
-function prevCard() {
-  currentIndex = (currentIndex - 1 + flashcards.length) % flashcards.length;
-  flipped = false;
-  flashcard.classList.remove("flipped");
-  showCard();
-}
+// ✅ Move to previous card, preserve flip state
+document.getElementById('back-btn')?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  currentCard = (currentCard - 1 + flashcards.length) % flashcards.length;
+  displayCard();
+});
 
-loadFlashcards();
+fetchFlashcards();
+
 
 
