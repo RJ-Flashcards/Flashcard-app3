@@ -74,6 +74,7 @@ button:hover, select:hover {
 .flashcard-back {
   transform: rotateY(180deg);
   background-color: #e9f5ff;
+backface-visibility: hidden;
 }
 
 /* Buttons container */
