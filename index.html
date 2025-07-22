@@ -33,7 +33,7 @@
 
     .card-container {
       perspective: 1000px;
-      width: 95%;
+      width: 100%;
       max-width: 480px;
       margin: 20px auto;
     }
@@ -41,7 +41,7 @@
     #flashcard {
       position: relative;
       width: 100%;
-      height: 220px;
+      aspect-ratio: 2 / 1;
       border: 4px solid forestgreen;
       border-radius: 20px;
       background-color: white;
@@ -49,6 +49,7 @@
       transition: transform 0.6s;
       transform-style: preserve-3d;
       cursor: pointer;
+      overflow: hidden;
     }
 
     #flashcard.flipped {
@@ -63,18 +64,27 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 28px;
-      padding: 20px;
+      font-size: 5vw;
+      padding: 10px;
       border-radius: 20px;
+      box-sizing: border-box;
     }
 
     .front {
       background-color: white;
+      backface-visibility: hidden;
     }
 
     .back {
       background-color: white;
       transform: rotateY(180deg);
+      backface-visibility: hidden;
+    }
+
+    @media (min-width: 500px) {
+      .card-face {
+        font-size: 28px;
+      }
     }
   </style>
 </head>
@@ -108,7 +118,6 @@
 
     let data = [];
     let currentIndex = 0;
-    let showingFront = true;
 
     const flashcard = document.getElementById("flashcard");
     const cardFront = document.getElementById("card-front");
@@ -121,13 +130,12 @@
       try {
         const response = await fetch(url);
         const text = await response.text();
-        const rows = text.trim().split("\n").slice(1); // skip header
+        const rows = text.trim().split("\n").slice(1);
         data = rows.map(row => {
           const [word, definition] = row.split(",");
           return [word?.trim(), definition?.trim()];
         });
         currentIndex = 0;
-        showingFront = true;
         flashcard.classList.remove("flipped");
         displayCard();
       } catch (err) {
@@ -144,14 +152,12 @@
     }
 
     flashcard.addEventListener("click", () => {
-      showingFront = !showingFront;
       flashcard.classList.toggle("flipped");
     });
 
     document.getElementById("prevBtn").addEventListener("click", () => {
       if (currentIndex > 0) {
         currentIndex--;
-        showingFront = true;
         flashcard.classList.remove("flipped");
         displayCard();
       }
@@ -160,7 +166,6 @@
     document.getElementById("nextBtn").addEventListener("click", () => {
       if (currentIndex < data.length - 1) {
         currentIndex++;
-        showingFront = true;
         flashcard.classList.remove("flipped");
         displayCard();
       }
@@ -177,6 +182,7 @@
   </script>
 </body>
 </html>
+
 
 
 
