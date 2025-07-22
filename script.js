@@ -1,88 +1,58 @@
-const baseSheetID = '1AwPGr0h17V5CWTgO4GGk35hD8fr_GDy9uHOjTVIO3n4';
+const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSm6VvHmCWfFh3Av-KM6IvuqcD_UdhNEq6-p_OE3V2e3BHs7boOoRb20Xq73isuU7eyvlqfl9SHNbMv/pub?output=csv";
+
 let flashcards = [];
-let currentCard = 0;
-let isFlipped = false;
+let currentIndex = 0;
+let flipped = false;
 
-function getSheetURL(gid) {
-  return `https://docs.google.com/spreadsheets/d/${baseSheetID}/export?format=csv&gid=${gid}`;
-}
+const flashcard = document.querySelector(".flashcard");
+const flashcardFront = document.getElementById("flashcard-front");
+const flashcardBack = document.getElementById("flashcard-back");
+const flashcardInner = document.getElementById("flashcard-inner");
 
-function fetchFlashcards(gid) {
-  const sheetURL = getSheetURL(gid);
+async function loadFlashcards() {
+  try {
+    const response = await fetch(sheetUrl);
+    const data = await response.text();
+    const rows = data.trim().split("\n").slice(1); // skip header
 
-  fetch(sheetURL)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Failed to fetch CSV');
-      }
-      return response.text();
-    })
-    .then(data => {
-      const lines = data.trim().split('\n');
-      flashcards = lines.slice(1).map(line => {
-        // Split only on the first comma to support commas in definitions
-        const [term, ...rest] = line.split(',');
-        const definition = rest.join(','); 
-        return { term: term.trim(), definition: definition.trim() };
-      });
-      currentCard = 0;
-      isFlipped = false;
-      displayCard();
-    })
-    .catch(error => {
-      document.getElementById('card-front').innerText = 'Error loading flashcards.';
-      document.getElementById('card-back').innerText = '';
-      console.error('Error:', error);
+    flashcards = rows.map(row => {
+      const [word, definition] = row.split(",");
+      return { word: word.trim(), definition: definition.trim() };
     });
-}
 
-function displayCard() {
-  const front = document.getElementById('card-front');
-  const back = document.getElementById('card-back');
-  const card = flashcards[currentCard];
-
-  front.innerText = card.term;
-  back.innerText = card.definition;
-
-  const flashcard = document.getElementById('flashcard');
-  if (isFlipped) {
-    flashcard.classList.add('flipped');
-  } else {
-    flashcard.classList.remove('flipped');
+    showCard();
+  } catch (error) {
+    flashcardFront.textContent = "Error loading flashcards";
+    flashcardBack.textContent = "";
+    console.error("Failed to load flashcards:", error);
   }
 }
 
-// Flip card on tap (not button click)
-document.getElementById('flashcard').addEventListener('click', (e) => {
-  if (e.target.tagName.toLowerCase() === 'button') {
-    e.stopPropagation();
-    return;
-  }
-  const flashcard = document.getElementById('flashcard');
-  flashcard.classList.toggle('flipped');
-  isFlipped = !isFlipped;
-});
+function showCard() {
+  const card = flashcards[currentIndex];
+  flashcardFront.textContent = card.word;
+  flashcardBack.textContent = card.definition;
+}
 
-document.getElementById('next-btn').addEventListener('click', (e) => {
-  e.stopPropagation();
-  isFlipped = false;  // Reset to front on navigation
-  currentCard = (currentCard + 1) % flashcards.length;
-  displayCard();
-});
+function flipCard() {
+  flipped = !flipped;
+  flashcard.classList.toggle("flipped", flipped);
+}
 
-document.getElementById('back-btn').addEventListener('click', (e) => {
-  e.stopPropagation();
-  isFlipped = false;  // Reset to front on navigation
-  currentCard = (currentCard - 1 + flashcards.length) % flashcards.length;
-  displayCard();
-});
+function nextCard() {
+  currentIndex = (currentIndex + 1) % flashcards.length;
+  flipped = false;
+  flashcard.classList.remove("flipped");
+  showCard();
+}
 
-document.getElementById('sheet-select').addEventListener('change', (e) => {
-  const selectedGID = e.target.value;
-  isFlipped = false;
-  fetchFlashcards(selectedGID);
-});
+function prevCard() {
+  currentIndex = (currentIndex - 1 + flashcards.length) % flashcards.length;
+  flipped = false;
+  flashcard.classList.remove("flipped");
+  showCard();
+}
 
-// Load initial sheet (Day 1 = gid 0)
-fetchFlashcards('0');
+loadFlashcards();
+
 
