@@ -1,0 +1,207 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Vocabulary Flashcards</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 16px;
+      text-align: center;
+      background-color: #f4f4f4;
+      margin: 0;
+    }
+    #controls {
+      margin-bottom: 20px;
+    }
+    select, button {
+      font-size: 18px;
+      padding: 12px 24px;
+      margin: 5px;
+      border: none;
+      border-radius: 8px;
+      background-color: #007BFF;
+      color: white;
+      cursor: pointer;
+      user-select: none;
+    }
+    button:hover, select:hover {
+      background-color: #0056b3;
+    }
+    .card-container {
+      perspective: 1000px;
+      width: 95%;
+      max-width: 420px;
+      margin: 20px auto;
+    }
+    .flashcard {
+      width: 100%;
+      height: 280px;
+      position: relative;
+      border: 4px solid forestgreen;
+      border-radius: 20px;
+      background-color: transparent;
+      box-sizing: border-box;
+      transition: box-shadow 0.3s;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.13);
+      cursor: pointer;
+    }
+    .flashcard-inner {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.6s;
+      border-radius: 20px;
+    }
+    .flashcard.flipped .flashcard-inner {
+      transform: rotateY(180deg);
+    }
+    .card-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      padding: 20px;
+      border-radius: 20px;
+      box-sizing: border-box;
+      background-color: white;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      word-break: break-word;
+    }
+    .front {
+      /* No transform, front face */
+    }
+    .back {
+      background-color: #e9f5ff;
+      transform: rotateY(180deg);
+    }
+    .buttons {
+      margin-top: 14px;
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+    }
+    .buttons button {
+      min-width: 130px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.13);
+      transition: background-color 0.3s ease;
+    }
+    @media (max-width: 600px) {
+      .card-container { max-width: 98vw; }
+      .flashcard { height: 220px; }
+      .card-face { font-size: 20px; }
+    }
+    #logo {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      width: 80px;
+      height: auto;
+      opacity: 0.9;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+  <h1>Vocabulary Flashcards</h1>
+  <div id="controls">
+    <label for="daySelect">Choose a Day:</label>
+    <select id="daySelect">
+      <option value="day1">Day 1</option>
+      <option value="day2">Day 2</option>
+    </select>
+  </div>
+  <div class="card-container">
+    <div class="flashcard" id="flashcard">
+      <div class="flashcard-inner">
+        <div class="card-face front" id="card-front">Loading...</div>
+        <div class="card-face back" id="card-back"></div>
+      </div>
+    </div>
+  </div>
+  <div class="buttons">
+    <button id="prevBtn">Back</button>
+    <button id="nextBtn">Next</button>
+  </div>
+  <img src="logo.png" alt="Logo" id="logo">
+  <script>
+    const urls = {
+      day1: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSm6VvHmCWfFh3Av-KM6IvuqcD_UdhNEq6-p_OE3V2e3BHs7boOoRb20Xq73isuU7eyvlqfl9SHNbMv/pub?gid=0&single=true&output=csv",
+      day2: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSm6VvHmCWfFh3Av-KM6IvuqcD_UdhNEq6-p_OE3V2e3BHs7boOoRb20Xq73isuU7eyvlqfl9SHNbMv/pub?gid=761404854&single=true&output=csv"
+    };
+    let data = [];
+    let currentIndex = 0;
+    let showingFront = true;
+
+    const daySelect = document.getElementById("daySelect");
+    const flashcard = document.getElementById("flashcard");
+    const cardInner = flashcard.querySelector('.flashcard-inner');
+    const cardFront = document.getElementById("card-front");
+    const cardBack = document.getElementById("card-back");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+
+    async function loadCSV(url) {
+      cardFront.textContent = "Loading...";
+      cardBack.textContent = "";
+      try {
+        const response = await fetch(url);
+        const text = await response.text();
+        const rows = text.trim().split("\n").slice(1);
+        data = rows.map(row => {
+          const [word, definition] = row.split(",");
+          return [word?.trim(), definition?.trim()];
+        });
+        currentIndex = 0;
+        showingFront = true;
+        flashcard.classList.remove("flipped");
+        displayCard();
+      } catch (err) {
+        cardFront.textContent = "Error loading flashcards.";
+        cardBack.textContent = "";
+      }
+    }
+
+    function displayCard() {
+      if (!data[currentIndex]) return;
+      const [word, definition] = data[currentIndex];
+      cardFront.textContent = word;
+      cardBack.textContent = definition;
+    }
+
+    flashcard.addEventListener("click", function (e) {
+      if (e.target.closest('.buttons')) return;
+      showingFront = !showingFront;
+      flashcard.classList.toggle("flipped");
+    });
+
+    prevBtn.addEventListener("click", function () {
+      if (data.length === 0) return;
+      currentIndex = (currentIndex - 1 + data.length) % data.length;
+      displayCard();
+    });
+
+    nextBtn.addEventListener("click", function () {
+      if (data.length === 0) return;
+      currentIndex = (currentIndex + 1) % data.length;
+      displayCard();
+    });
+
+    daySelect.addEventListener("change", function () {
+      loadCSV(urls[daySelect.value]);
+    });
+
+    window.onload = function () {
+      daySelect.value = "day1";
+      loadCSV(urls.day1);
+    };
+  </script>
+</body>
+</html>
